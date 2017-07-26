@@ -51,5 +51,5 @@ In this example we will be using .Call interface, it provides nice flexibility a
 .External         R_ExternalMethodDef
 ```
 
-If you are planning to writer C or C++ extension then you may also want to explore the 'Rcpp' package though it is not an integral part of R.
+FYI: If you are planning to writer C or C++ extension then you may also want to explore the 'Rcpp' package though it is not an integral part of R.
 
