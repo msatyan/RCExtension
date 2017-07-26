@@ -42,12 +42,14 @@ FYI: By default, R uses the operating system-specific dynamic loader to lookup t
 
 
 R provides a set of interface for extending it, they are listed below for you to explore further 
-In this example we will be using .Call interface, it provides nice flexibility and efficiency by giving reference access to memory structures across language boundaries (R vs C). The .C interface is relatively simple but not that efficient. Likely half the performance compared to .Call because it copies objects while exchanging language boundaries. 
+In this example we will be using .Call interface, it provides nice flexibility and efficiency by giving reference access to memory structures across language boundaries (R vs C). The .C interface is relatively simple but not that efficient. Likely half the performance compared to .Call because it copies objects while exchanging language boundaries.  
 
+```
 .C                R_CMethodDef
 .Call             R_CallMethodDef
 .Fortran          R_FortranMethodDef
 .External         R_ExternalMethodDef
+```
 
 If you are planning to writer C or C++ extension then you may also want to explore the 'Rcpp' package though it is not an integral part of R.
 
