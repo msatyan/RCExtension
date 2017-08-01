@@ -53,3 +53,5 @@ In this example we will be using .Call interface, it provides nice flexibility a
 
 FYI: If you are planning to writer C or C++ extension then you may also want to explore the 'Rcpp' package though it is not an integral part of R.
 
+### R Project and Package
+[Package structure](http://r-pkgs.had.co.nz/package.html)
