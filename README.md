@@ -29,9 +29,9 @@ TODO:
 The core of the R extension by using C is a shared library (**.so** on Linux and **.DLL** on Windows). This shared library will be loaded on demand into R interpreter's process space by using **dyn.load** and unloaded by **dyn.unload**. 
 ```C
 // Example:
-library.dynam("mylib", package, lib.loc)
+library.dynam("RCExtension", package, lib.loc)
 ```
-Once the library has loaded into R interpreter's process space, it looks for the symbol named **R_init_mylib**. Similarly, when unloading the object, R looks for a routine named **R_unload_mylib**. Where **'mylib'** is the name of the extension shared library.  
+Once the library has loaded into R interpreter's process space, it looks for the symbol named **R_init_RCExtension**. Similarly, when unloading the object, R looks for a routine named **R_unload_RCExtension**. Where **'RCExtension'** is the name of the extension shared library.  
 FYI: By default, R uses the operating system-specific dynamic loader to lookup the symbol in the shared library. The recommended approach is explicitly register routines with R and use a single, platform-independent mechanism for finding the routines in shared library.
 
 ```C
@@ -39,13 +39,13 @@ FYI: By default, R uses the operating system-specific dynamic loader to lookup t
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 
-void R_init_mylib(DllInfo *info)
+void R_init_RCExtension(DllInfo *info)
 {
   // Register routines,
   // allocate resources.
 }
 
-void R_unload_mylib(DllInfo *info)
+void R_unload_RCExtension(DllInfo *info)
 {
   // Release resources.
 }
@@ -96,8 +96,29 @@ By now you may have learned how to build a shared library from C source code. Th
 
 We may call **R_registerRoutines()** function (a C API by R) to registering C functions that we plan to expose to R.This is typically done when the DLL is first loaded within the initialization routine R_init_**'dll name'** which is described in **dyn.load**.
 
+```C
+	
+SEXP CFunc1(SEXP a, SEXP b, SEXP c);
+SEXP CFunc2(SEXP a, SEXP b);
+SEXP CFunc2(SEXP a, SEXP b, SEXP c, SEXP d);
 
-R provides a set of interface for extending it, some of them are listed below. In this example we will be using **.Call** interface, it provides nice flexibility and efficiency by giving reference access to memory structures across language boundaries (R vs C). The **.C** interface is relatively simple but not that efficient. Likely endup half the performance compared to **.Call** because it copies objects while exchanging language boundaries.  
+R_CallMethodDef callMethods[]  = 
+{
+  {"NameofCFunc1inR", (DL_FUNC) &CFunc1, 3},
+  {"NameofCFunc2inR", (DL_FUNC) &CFunc2, 2},
+  {"NameofCFunc3inR", (DL_FUNC) &CFunc3, 2},
+  {NULL, NULL, 0}
+};
+
+void R_init_RCExtension(DllInfo *dllInfo)
+{
+   R_registerRoutines(dllInfo, NULL, callMethods, NULL, NULL);
+}
+```
+
+R provides four interface for extending it {**.C, .Call, .Fortran, .External**}. In this example we are focusing more on **.Call** interface, it provides nice flexibility and efficiency by giving **reference access to memory structures** across language boundaries (R and C/C++) within the process. The **.C** interface is relatively simple but not that efficient though. Likely endup half the performance compared to **.Call** (if there is lot of data exchange with the function call) because it copies objects while exchanging language boundaries.  
+
+**FYI:** If you are planning to writer **C or C++** extension then you may also want to explore the **'Rcpp'** package. Though it is not an integral part of R, it may make the integration simpler without much performance impact. If the system need extremely high efficiency, scalability and fault tolerance then the **.Call** is likely be the choice.
 
 ```
 .C                R_CMethodDef
@@ -106,7 +127,8 @@ R provides a set of interface for extending it, some of them are listed below. I
 .External         R_ExternalMethodDef
 ```
 
-FYI: If you are planning to writer **C or C++** extension then you may also want to explore the **'Rcpp'** package; though it is not an integral part of R.
+By default, R uses the operating system-specific dynamic loader to lookup the symbol in the shared library. The recommended approach is explicitly register routines with R and use a single, platform-independent mechanism for finding the routines in shared library.
+
 
 ### R Project and Package
 [Package structure](http://r-pkgs.had.co.nz/package.html)
