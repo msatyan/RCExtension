@@ -1,4 +1,4 @@
-This is a sample R package to demonstrate how to extent R language functionality by using C language routines. The R language supports writing extensions by using a verity of languages. Extension module by using C language is very efficient and popular. The R provides flexibility and simplicity for statistical programing, at the same time it is inherently slow. The C language extensions can act as a turbocharger for R modules where it needs speed and efficiency.  
+This is a sample R package to demonstrate how to extent R  functionality by using C language routines. The R supports writing extensions by using a verity of languages. Extension module by using C is very efficient and popular. The R provides flexibility and simplicity for statistical programing, at the same time it is inherently slow. The C language extensions can act as a turbocharger for R modules where it needs speed and efficiency.
 
 ### References
 If you plan to create R Extensions then you may find the following information interesting.
