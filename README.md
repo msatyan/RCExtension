@@ -89,6 +89,7 @@ total 21
 * [The R API: entry points for C code](https://cran.r-project.org/doc/manuals/R-exts.html#The-R-API)
 * [System and foreign language interfaces](https://cran.r-project.org/doc/manuals/R-exts.html#System-and-foreign-language-interfaces)
 * [R’s C interface (Snippet from Advanced R)](http://adv-r.had.co.nz/C-interface.html)
+* [Package structure (R packages)](http://r-pkgs.had.co.nz/package.html)
 * [RStudio As An IDE For C++](https://charlotte-ngs.github.io/RStudioAsCppEditor/RStudioAsCppEditorDevDoc.html)
 
 ### Exposing C functions to R
@@ -150,5 +151,5 @@ void R_init_RCExtension(DllInfo *dllInfo)
 ```
 During the .C interface call we are providing more details about the argument type of the C function. R uses this additional information during marshaling the value of the parameter across language boundary. Where as in case of .Call interface the parameters are being accessed by reference then R assume the other language already know about the parameter type and its memory layout. 
 
-### R Project and Package
-[Package structure](http://r-pkgs.had.co.nz/package.html)
+
+
