@@ -91,8 +91,11 @@ total 21
 * [R’s C interface (Snippet from Advanced R)](http://adv-r.had.co.nz/C-interface.html)
 * [RStudio As An IDE For C++](https://charlotte-ngs.github.io/RStudioAsCppEditor/RStudioAsCppEditorDevDoc.html)
 
-### C Functions
-Now we may tell **R interpreter** about the **C functions** that we have packed in the **extension shared library**; eventually these functions will get exposed to R program. We may call (R CAPI)**R_registerRoutines()** function to registering C functions.
+### Exposing C functions to R
+By now you may have learned how to build a shared library from C source code. Then it is time to switch focus how to exposing C functions to R. In short it is by telling the **R interpreter** about the **C functions** that we have packed in the **extension shared library**. Eventually these functions will get exposed to R program.  
+
+We may call **R_registerRoutines()** function (a C API by R) to registering C functions that we plan to expose to R.This is typically done when the DLL is first loaded within the initialization routine R_init_**'dll name'** which is described in **dyn.load**.
+
 
 R provides a set of interface for extending it, some of them are listed below. In this example we will be using **.Call** interface, it provides nice flexibility and efficiency by giving reference access to memory structures across language boundaries (R vs C). The **.C** interface is relatively simple but not that efficient. Likely endup half the performance compared to **.Call** because it copies objects while exchanging language boundaries.  
 
