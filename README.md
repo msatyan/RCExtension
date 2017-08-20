@@ -97,16 +97,15 @@ By now you may have learned how to build a shared library from C source code. Th
 We may call **R_registerRoutines()** function (a C API by R) to registering C functions that we plan to expose to R.This is typically done when the DLL is first loaded within the initialization routine R_init_**'dll name'** which is described in **dyn.load**.
 
 ```C
-	
-SEXP CFunc1(SEXP a, SEXP b, SEXP c);
-SEXP CFunc2(SEXP a, SEXP b);
-SEXP CFunc2(SEXP a, SEXP b, SEXP c, SEXP d);
+SEXP myCFunc1(SEXP a, SEXP b, SEXP c);
+SEXP myCFunc2(SEXP a, SEXP b);
+SEXP myCFunc3(SEXP a, SEXP b, SEXP c, SEXP d);
 
 R_CallMethodDef callMethods[]  = 
 {
-  {"NameofCFunc1inR", (DL_FUNC) &CFunc1, 3},
-  {"NameofCFunc2inR", (DL_FUNC) &CFunc2, 2},
-  {"NameofCFunc3inR", (DL_FUNC) &CFunc3, 2},
+  {"myFunc1inR", (DL_FUNC) &myCFunc1, 3},
+  {"myFunc2inR", (DL_FUNC) &myCFunc2, 2},
+  {"myFunc3inR", (DL_FUNC) &myCFunc3, 4},
   {NULL, NULL, 0}
 };
 
@@ -127,8 +126,29 @@ R provides four interface for extending it {**.C, .Call, .Fortran, .External**}.
 .External         R_ExternalMethodDef
 ```
 
-By default, R uses the operating system-specific dynamic loader to lookup the symbol in the shared library. The recommended approach is explicitly register routines with R and use a single, platform-independent mechanism for finding the routines in shared library.
+By default, R uses the operating system-specific dynamic loader to lookup the symbol in the shared library. The recommended approach is explicitly register routines with R and use a single, platform-independent mechanism for finding the routines in shared library. With this approach R can get and store additional information about the methods to be more efficient based on the circumstances it is operating on. This additional information is highly useful while exchanging data during a function call from language boundary. For example the .Call interface makes reference access to the parameter where as .C interface copy and replicate parameters when it exchange the language boundary. 
 
+R allows mixing interface styles in the extensions, in the following example we have used both .C and .Call interfaces. Let us say, we are enhance the existing package by adding a couple of more C functions, this time by using .C interface then it may look like this.
+
+```C
+void myCFunc5(double *x, int *n, char **names, int *status);
+void myCFunc6(double *x, int *n, char **names);
+
+static R_NativePrimitiveArgType myCFunc5ArgType[] = {  REALSXP, INTSXP, STRSXP, LGLSXP };
+static R_NativePrimitiveArgType myCFunc6ArgType[] = {  REALSXP, INTSXP, STRSXP };
+
+static const R_CMethodDef cMethods[] = {
+   {"myFunc5inR", (DL_FUNC) &myCFunc5, 4, myCFunc5ArgType},
+   {"myFunc6inR", (DL_FUNC) &myCFunc6, 3, myCFunc6ArgType},
+   {NULL, NULL, 0, NULL}
+};
+
+void R_init_RCExtension(DllInfo *dllInfo)
+{
+   R_registerRoutines( dllInfo, cMethods, callMethods, NULL, NULL);
+}
+```
+During the .C interface call we are providing more details about the argument type of the C function. R uses this additional information during marshaling the value of the parameter across language boundary. Where as in case of .Call interface the parameters are being accessed by reference then R assume the other language already know about the parameter type and its memory layout. 
 
 ### R Project and Package
 [Package structure](http://r-pkgs.had.co.nz/package.html)
