@@ -15,7 +15,7 @@ If you plan to create R Extensions then you may find the following information i
 * **R Packages** by (Hadley Wickham)
 * **Advanced R** by (Hadley Wickham)
 
-### Recommitted system setup to create the package
+### System setup to create the package
 #### Windows
 * [Install R](https://cran.r-project.org/)
 * [Rtools](https://cran.rstudio.com/bin/windows/Rtools/) (GNU C/C++ compiler is part of it. **FYI**: I may advice it to be installed at default location which is **C:\Rtools**, to avoid extra build setup)
@@ -59,7 +59,7 @@ The two main activities involved in building an R package is building the R runt
 SET PATH=C:\Dev\R\R-3.4.1\bin\x64;C:\Dev\MiKTeX2.9\miktex\bin\x64\;c:\Rtools\bin;c:\Rtools\mingw_64\bin;%PATH%
 ```
 
-##### Firing a shared library build
+##### Firing build to creare shared library
 R CMD SHLIB *.c
 ```bash
 C:\work\RCExtension\src>R CMD SHLIB *.c
