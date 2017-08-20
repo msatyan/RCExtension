@@ -149,7 +149,7 @@ void R_init_RCExtension(DllInfo *dllInfo)
    R_registerRoutines( dllInfo, cMethods, callMethods, NULL, NULL);
 }
 ```
-During the .C interface call we are providing more details about the argument type of the C function. R uses this additional information during marshaling the value of the parameter across language boundary. Where as in case of .Call interface the parameters are being accessed by reference then R assume the other language already know about the parameter type and its memory layout. 
+The .C interface is very useful when we decided to expose existing C library function in R that knows nothing about R. Then while binding by using .C interface we are providing more details about the argument type of the native C functions. R uses this additional information during marshaling the value of the parameter while exchanging across language boundary. Where as in case of .Call interface the parameters are being accessed by reference then R assume each of the languages already know about the parameter type and its memory layout.
 
 
 
