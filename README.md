@@ -39,13 +39,13 @@ FYI: By default, R uses the operating system-specific dynamic loader to lookup t
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 
-void R_init_RCExtension(DllInfo *info)
+void R_init_RCExtension(DllInfo *dllInfo)
 {
   // Register routines,
   // allocate resources.
 }
 
-void R_unload_RCExtension(DllInfo *info)
+void R_unload_RCExtension(DllInfo *dllInfo)
 {
   // Release resources.
 }
