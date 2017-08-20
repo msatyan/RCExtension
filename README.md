@@ -12,8 +12,8 @@ If you plan to create R Extensions then you may find the following information i
 * [System and foreign language interfaces](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#System-and-foreign-language-interfaces)
 * [Developing Packages with RStudio](https://support.rstudio.com/hc/en-us/articles/200486488)
 #### Books:
-* **R Packages** by (Hadley Wickham)
-* **Advanced R** by (Hadley Wickham)
+* **R Packages** (by Hadley Wickham)
+* **Advanced R** (by Hadley Wickham)
 
 ### System setup to create the package
 #### Windows
