@@ -78,19 +78,6 @@ total 21
 ```
 
 
-##### See also:
-* [Creating shared objects](https://cran.r-project.org/doc/manuals/R-exts.html#Creating-shared-objects)
-* [Package Development Prerequisites](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites)
-* [Building R for Windows](https://cran.r-project.org/bin/windows/Rtools/)
-* [MinGW](http://www.mingw.org/)
-* [Using external compilers with R](http://www.stats.uwo.ca/faculty/murdoch/software/compilingDLLs/)
-* [Writing packages for R](http://www.stats.uwo.ca/faculty/murdoch/software/compilingDLLs/readme.packages.txt)
-* [Customizing package compilation](https://cran.r-project.org/doc/manuals/R-admin.html#Customizing-package-compilation)
-* [The R API: entry points for C code](https://cran.r-project.org/doc/manuals/R-exts.html#The-R-API)
-* [System and foreign language interfaces](https://cran.r-project.org/doc/manuals/R-exts.html#System-and-foreign-language-interfaces)
-* [R’s C interface (Snippet from Advanced R)](http://adv-r.had.co.nz/C-interface.html)
-* [Package structure (R packages)](http://r-pkgs.had.co.nz/package.html)
-* [RStudio As An IDE For C++](https://charlotte-ngs.github.io/RStudioAsCppEditor/RStudioAsCppEditorDevDoc.html)
 
 ### Exposing C functions to R
 By now you may have learned how to build a shared library from C source code. Then it is time to switch focus how to exposing C functions to R. In short it is by telling the **R interpreter** about the **C functions** that we have packed in the **extension shared library**. Eventually these functions will get exposed to R program.  
@@ -152,4 +139,16 @@ void R_init_RCExtension(DllInfo *dllInfo)
 The .C interface is very useful when we decided to expose existing C library function in R that knows nothing about R. Then while binding by using .C interface we are providing more details about the argument type of the native C functions. R uses this additional information during marshaling the value of the parameter while exchanging across language boundary. Where as in case of .Call interface the parameters are being accessed by reference then R assume each of the languages already know about the parameter type and its memory layout.
 
 
-
+##### See also:
+* [Creating shared objects](https://cran.r-project.org/doc/manuals/R-exts.html#Creating-shared-objects)
+* [Package Development Prerequisites](https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites)
+* [Building R for Windows](https://cran.r-project.org/bin/windows/Rtools/)
+* [MinGW](http://www.mingw.org/)
+* [Using external compilers with R](http://www.stats.uwo.ca/faculty/murdoch/software/compilingDLLs/)
+* [Writing packages for R](http://www.stats.uwo.ca/faculty/murdoch/software/compilingDLLs/readme.packages.txt)
+* [Customizing package compilation](https://cran.r-project.org/doc/manuals/R-admin.html#Customizing-package-compilation)
+* [The R API: entry points for C code](https://cran.r-project.org/doc/manuals/R-exts.html#The-R-API)
+* [System and foreign language interfaces](https://cran.r-project.org/doc/manuals/R-exts.html#System-and-foreign-language-interfaces)
+* [R’s C interface (Snippet from Advanced R by Hadley Wickham)](http://adv-r.had.co.nz/C-interface.html)
+* [Package structure (R packages by Hadley Wickham)](http://r-pkgs.had.co.nz/package.html)
+* [RStudio As An IDE For C++](https://charlotte-ngs.github.io/RStudioAsCppEditor/RStudioAsCppEditorDevDoc.html)
