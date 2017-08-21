@@ -77,7 +77,73 @@ total 21
 ---------- 1 devc mkpasswd   863 Aug 20 10:58 MyRCExtn1.o
 ```
 
+### Visual Studio for builing the shared library
+We can use Visual Studio (here I am using VS 2017) to build the shared library. For this a bit of reverse engineering we have to do first. The R installation has put **R.DLL** but no **R.LIB**, then we have to create **R.LIB from R.DLL** before we can start use Visual Studio.  
 
+I have installed 64 bit version of R at C:\Dev\R\R-3.4.1, then the R.DLL will be located at C:\Dev\R\R-3.4.1\bin\x64.
+
+```bash
+#open VS x64 command windows
+cd C:\Dev\R\R-3.4.1\bin\x64
+dumpbin /EXPORTS R.dll > r.def
+```
+
+Edit **r.def** file by only keeping the exported symbols. At the top of the line add a line **EXPORTS**. For your reference r.def file has been included with this repository, it is available at **Scratchpad**. If you cat r.def the output may look like this.  
+
+```bash
+$ cat r.def
+
+EXPORTS
+ATTRIB
+AllDevicesKilled
+BODY
+CAAR
+CAD4R
+CADDDR
+CADDR
+- - - - - - 
+- - - - - - 
+- - - - - - 
+- - - - - - 
+windelmenuitem
+windelmenus
+wingetmenuitems
+xdr_double
+xdrmem_create
+xerbla_
+```
+
+Now you can use **LIB** utility to create the library by using the following command   
+**lib /def:r.def /OUT:r.lib  /MACHINE:X64**
+```bat
+C:\Dev\R\R-3.4.1\bin\x64> lib /def:r.def /OUT:r.lib  /MACHINE:X64
+Microsoft (R) Library Manager Version 14.11.25506.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+   Creating library r.lib and object r.exp
+```
+
+If you do a listing of the dir then you may see **r.lib** has created
+```
+C:\Dev\R\R-3.4.1\bin\x64>ls -l r.*
+---------- 1 devc mkpasswd  15792 Aug 20 19:49 r.def
+---------- 1 devc mkpasswd 125329 Aug 20 20:41 r.exp
+---------- 1 devc mkpasswd 202816 Aug 20 20:41 r.lib
+```
+
+You are now ready to use VS to build the shared library. Make sure you have appropriately specified additional **INCLUDE** and **LIB** directories along with **R.LIB**
+```bat
+# set this on your system env
+set MY_R_DIR=C:\Dev\R\R-3.4.1
+
+# VS Project setting, specify additional **INCLUDE** and **LIB** directories with the following.
+
+$(MY_R_DIR)\include
+$(MY_R_DIR)\bin\x64
+
+# then also specify R.LIB
+r.lib
+```
 
 ### Exposing C functions to R
 By now you may have learned how to build a shared library from C source code. Then it is time to switch focus how to exposing C functions to R. In short it is by telling the **R interpreter** about the **C functions** that we have packed in the **extension shared library**. Eventually these functions will get exposed to R program.  
