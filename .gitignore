@@ -1,5 +1,6 @@
 # Prerequisites
 *.d
+.Rhistory
 
 # Object files
 *.o

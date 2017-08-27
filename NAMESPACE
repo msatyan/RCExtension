@@ -1,1 +1,4 @@
+useDynLib(RCExtension, .registration = TRUE, .fixes = "C_")
+
 exportPattern("^[[:alpha:]]+")
+

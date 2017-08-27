@@ -151,4 +151,5 @@ The .C interface is very useful when we decided to expose existing C library fun
 * [System and foreign language interfaces](https://cran.r-project.org/doc/manuals/R-exts.html#System-and-foreign-language-interfaces)
 * [R’s C interface (Snippet from Advanced R by Hadley Wickham)](http://adv-r.had.co.nz/C-interface.html)
 * [Package structure (R packages by Hadley Wickham)](http://r-pkgs.had.co.nz/package.html)
+* [Building, Testing, and Distributing Packages](https://support.rstudio.com/hc/en-us/articles/200486508-Building-Testing-and-Distributing-Packages)
 * [RStudio As An IDE For C++](https://charlotte-ngs.github.io/RStudioAsCppEditor/RStudioAsCppEditorDevDoc.html)
