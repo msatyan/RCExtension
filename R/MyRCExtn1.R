@@ -15,41 +15,56 @@
 
 # library(RCExtension)
 #
-.onLoad <- function(lib, pkg) {
+.onLoad <- function(lib, pkg) 
+{
    library.dynam("RCExtension", pkg, lib )
 }
 
-hello <- function() {
+hello <- function() 
+{
   print("Hello, world!")
 }
 
 
-Increment <- function(a) {
-  #.Call( "Increment," )
-  # .Call( getNativeSymbolInfo("Increment,") )
-  .Call( C_Increment, a )
+Increment <- function(x) 
+{
+  # .Call( "Increment" )
+  # .Call( getNativeSymbolInfo("Increment") )
+  .Call( C_Increment, x )
 }
 
 
-# Multiply <- function(a, b) {
-#   .C(C_Multiply, as.double(a), as.double(b))
-# }
+Multiply <- function(x, y) 
+{
+  # .C() automatically converts back and forth between R vectors and their C equivalents.
+  # The output will be on the third parameter, extract that
+  .C( C_Multiply, x, y, numeric(1) ) [[3]]
+}
 
-# Divide <- function(a, b) {
-#   .C(C_Divide, a, b)
-# }
+
+Divide <- function(x, y) 
+{
+  # .C() automatically converts back and forth between R vectors and their C equivalents.
+  # The output will be on the third parameter, extract that
+  .C( C_Divide,  x, y, numeric(1) ) [[3]]
+}
 
 
-MyPi <- function() {
+MyPi <- function() 
+{
   .Call(C_MyPi)
 }
 
-Add <- function(a, b) {
-  .Call(C_Add, a, b)
+
+Add <- function(x, y) 
+{
+  .Call(C_Add, x, y)
 }
 
-Subtract <- function(a, b) {
-  .Call(C_Subtract, a, b)
+
+Subtract <- function(x, y) 
+{
+  .Call(C_Subtract, x, y)
 }
 
 

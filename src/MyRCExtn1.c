@@ -5,31 +5,34 @@
 #include <R_ext/Rdynload.h>
 
 
-double Multiply(double a, double b);
-double Divide(double a, double b);
-
-SEXP Add(SEXP a, SEXP b);
-SEXP Subtract(SEXP a, SEXP b);
-SEXP Increment(SEXP a);
+SEXP Add(SEXP x, SEXP y);
+SEXP Subtract(SEXP x, SEXP y);
+SEXP Increment(SEXP x);
 SEXP MyPi();
 
 /////////// .C interface style ////////////////
-// static R_NativePrimitiveArgType argMultiply[] = {  REALSXP, REALSXP };
-// static R_NativePrimitiveArgType argDivide[] = {  REALSXP, REALSXP };
+// The functions should return void in order to deal with .C, 
+// so we have to use function parameter to return value to the caller. 
+void Multiply( double *x, double *y, double *result );
+void   Divide( double *x, double *y, double *result );
 
-// static const R_CMethodDef cMethods[] = {
-//    {"Multiply", (DL_FUNC) &Multiply, 2, argMultiply},
-//    {"Divide", (DL_FUNC) &Divide, 2, argDivide},
-//    {NULL, NULL, 0, NULL}
-// };
+static R_NativePrimitiveArgType argMultiply[] = {  REALSXP, REALSXP, REALSXP };
+static R_NativePrimitiveArgType argDivide[] = {  REALSXP, REALSXP, REALSXP };
 
+static const R_CMethodDef cMethods[] = 
+{ 
+	// C functions extended by using .C interface 
+   {"Multiply",   (DL_FUNC) &Multiply, 3, argMultiply},
+   {"Divide",     (DL_FUNC) &Divide,   3, argDivide},
+   {NULL, NULL, 0, NULL}
+};
 
-///////// .Call interface style ///////////
-R_CallMethodDef callMethods[] =
+R_CallMethodDef callMethods[] = 
 {
-	{ "Add",        (DL_FUNC)&Add, 2 },
-	{ "Subtract",   (DL_FUNC)&Subtract, 2 },
-	{ "MyPi",       (DL_FUNC)&MyPi, 0 },
+	// C functions extended by using .Call interface 
+	{ "Add",        (DL_FUNC)&Add,       2 },
+	{ "Subtract",   (DL_FUNC)&Subtract,  2 },
+	{ "MyPi",       (DL_FUNC)&MyPi,      0 },
 	{ "Increment",  (DL_FUNC)&Increment, 1 },
 	{ NULL, NULL, 0 }
 };
@@ -44,49 +47,50 @@ void R_unload_RCExtension(DllInfo *info)
 {
   // Release resources.
 }
+////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
 ////// Pure C functions to be used with .C interface /////
-double Multiply(double a, double b)
+// The functions should return void in order to deal with .C, 
+// so we have to use function parameter to return value to the caller. 
+void Multiply(double *x, double *y, double *result)
 {
-	double result = a * b;
-	return result;
+	*result = *x * *y;
 }
 
-double Divide(double a, double b)
+void Divide(double *x, double *y, double *result)
 {
-	double result = 0;
+	*result = 0;
 
-	if( b != 0 )
-		result = a / b;
-
-	return result;
+	if( *y != 0 )
+		*result = *x / *y;
 }
 
 
 //////// Function to be used with .Call interface //////////// 
-SEXP Add(SEXP a, SEXP b)
+SEXP Add(SEXP x, SEXP y)
 {
 	SEXP result = PROTECT(allocVector(REALSXP, 1));
-	REAL(result)[0] = asReal(a) + asReal(b);
+	REAL(result)[0] = asReal(x) + asReal(y);
 	UNPROTECT(1);
   
 	return result;
 }
 
-SEXP Subtract(SEXP a, SEXP b)
+SEXP Subtract(SEXP x, SEXP y)
 {
 	SEXP result = PROTECT(allocVector(REALSXP, 1));
-	REAL(result)[0] = asReal(a) - asReal(b);
+	REAL(result)[0] = asReal(x) - asReal(y);
 	UNPROTECT(1);
   
 	return result;
 }
 
 
-SEXP Increment(SEXP a)
+SEXP Increment(SEXP x)
 {
 	SEXP result = PROTECT(allocVector(REALSXP, 1));
-	REAL(result)[0] = asReal(a) + 1;
+	REAL(result)[0] = asReal(x) + 1;
 	UNPROTECT(1);
   
 	return result;
