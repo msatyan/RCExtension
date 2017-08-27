@@ -225,6 +225,43 @@ void R_init_RCExtension(DllInfo *dllInfo)
 ```
 The .C interface is useful when we decided to expose existing C library function in R that knows nothing about R. Then while binding by using .C interface we are providing more details about the argument type of the native C functions. R uses this additional information during marshaling the value of the parameter while exchanging across language boundary. Where as in case of .Call interface the parameters are being accessed by reference then R assume each of the languages already know about the parameter type and its memory layout.
 
+The .C() interface's automatic back and forth mapping between R vectors and their C equivalents is listed here. 
+
+| **R type**   | **C type** |
+|:-------------|:-------------------|
+| `Logical`    | int*       |
+| `Integer`    | int*       | 
+| `Double`     | double*    | 
+| `Character`  | char**     | 
+| `Raw`        | unsigned char*    | 
+|
+
+### Using the C function in R
+Those C functions so far we have exposed to R can be called by using  its corresponding interface.
+
+```R
+.C( "Multiply", x, y, numeric(1) ) [[3]]
+```
+
+```R
+.Call( "Add", x, y)
+```
+To make it more user-friendly we could provide wrapper functions that resonate well with the traditional function usage, then it becomes.
+```R
+Multiply <- function(x, y) 
+{
+  .C( "Multiply", x, y, numeric(1) ) [[3]]
+}
+```
+
+```R
+Add <- function(x, y) 
+{
+  .Call("Add", x, y)
+}
+```
+
+
 
 ##### See also:
 * [Creating shared objects](https://cran.r-project.org/doc/manuals/R-exts.html#Creating-shared-objects)
