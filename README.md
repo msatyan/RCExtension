@@ -31,6 +31,17 @@ The core of the R extension by using C is a shared library (**.so** on Linux and
 // Example:
 library.dynam("RCExtension", package, lib.loc)
 ```
+
+A possible right location call this will be when a package is getting loaded. The **.onLoad()** lifecycle hook provided by R is getting called when a page get loaded. Then we may put the code in that routine.   
+See also :  .onAttach(),   .onUnload(),  .onDetach(),   .Last.lib()
+
+```R
+.onLoad <- function(lib, pkg) 
+{
+   library.dynam("RCExtension", pkg, lib )
+}
+```
+
 Once the library has loaded into R interpreter's process space, it looks for the symbol named **R_init_RCExtension**. Similarly, when unloading the object, R looks for a routine named **R_unload_RCExtension**. Where **'RCExtension'** is the name of the extension shared library.  
 FYI: By default, R uses the operating system-specific dynamic loader to lookup the symbol in the shared library. The recommended approach is explicitly register routines with R and use a single, platform-independent mechanism for finding the routines in shared library.
 

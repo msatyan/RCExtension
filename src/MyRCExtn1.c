@@ -11,6 +11,9 @@ SEXP Increment(SEXP x);
 SEXP MyPi();
 
 /////////// .C interface style ////////////////
+// void MyFunc1(double *x, int *n, char **names, int *status);
+// static R_NativePrimitiveArgType argMyFunc1[] = {  REALSXP, INTSXP, STRSXP, LGLSXP };
+
 // The functions should return void in order to deal with .C, 
 // so we have to use function parameter to return value to the caller. 
 void Multiply( double *x, double *y, double *result );
