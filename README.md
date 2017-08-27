@@ -198,16 +198,16 @@ By default, R uses the operating system-specific dynamic loader to lookup the sy
 R allows mixing interface styles in the extensions, in the following example we have used both .C and .Call interfaces. Let us say, we are enhance the existing package by adding a couple of more C functions, this time by using .C interface then it may look like this.
 
 ```C
-// double *x, int *n, char **names, int *status
-// REALSXP,   INTSXP, STRSXP,       LGLSXP
-
-// The C functions should return void if used with .C, 
-// to use function parameter to get return value. 
+// The C functions should return void to be used with .C interface.
+// Then capture the result through parameter
 void Multiply( double *x, double *y, double *result );
 void   Divide( double *x, double *y, double *result );
 
 static R_NativePrimitiveArgType argMultiply[] = {  REALSXP, REALSXP, REALSXP };
 static R_NativePrimitiveArgType argDivide[] = {  REALSXP, REALSXP, REALSXP };
+
+// double *x,     int *n,     char **names,     int *status
+// REALSXP,       INTSXP,     STRSXP,           LGLSXP
 
 static const R_CMethodDef cMethods[] = 
 { 
