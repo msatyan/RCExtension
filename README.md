@@ -203,11 +203,10 @@ R allows mixing interface styles in the extensions, in the following example we 
 void Multiply( double *x, double *y, double *result );
 void   Divide( double *x, double *y, double *result );
 
+// double *,      int *,     char **,     int *
+// REALSXP,       INTSXP,    STRSXP,      LGLSXP
 static R_NativePrimitiveArgType argMultiply[] = {  REALSXP, REALSXP, REALSXP };
 static R_NativePrimitiveArgType argDivide[] = {  REALSXP, REALSXP, REALSXP };
-
-// double *x,     int *n,     char **names,     int *status
-// REALSXP,       INTSXP,     STRSXP,           LGLSXP
 
 static const R_CMethodDef cMethods[] = 
 { 
