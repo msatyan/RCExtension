@@ -216,6 +216,17 @@ static const R_CMethodDef cMethods[] =
 };
 
 ```
+The R types and corresponding param type 
+| **R type**   | **Param type** |**Raw C type**
+|:-------------|:---------------|:---------------
+| `numeric`    | REALSXP        | double *
+| `integer`    | INTSXP         | int *
+| `logical`    | LGLSXP         | int *
+| `single`     | SINGLESXP      | 
+| `character`  | STRSXP         | char **
+| `list`       | VECSXP         | 
+
+
 Then we modify the **R_registerRoutines()** function call to include **cMethods** structure also.
 ```C
 void R_init_RCExtension(DllInfo *dllInfo)
@@ -228,16 +239,20 @@ The .C interface is useful when we decided to expose existing C library function
 The .C() interface's automatic back and forth mapping between R vectors and their C equivalents is listed here. 
 
 | **R type**   | **C type** |
-|:-------------|:-------------------|
+|:-------------|:-----------|
 | `Logical`    | int*       |
 | `Integer`    | int*       | 
 | `Double`     | double*    | 
 | `Character`  | char**     | 
 | `Raw`        | unsigned char*    | 
-|
+
 
 ### Using the C function in R
 Those C functions so far we have exposed to R can be called by using  its corresponding interface.
+
+```diff
+- FYI: Such usage has broken with R version 3.0 and above
+```
 
 ```R
 .C( "Multiply", x, y, numeric(1) ) [[3]]
@@ -246,7 +261,7 @@ Those C functions so far we have exposed to R can be called by using  its corres
 ```R
 .Call( "Add", x, y)
 ```
-To make it more user-friendly we could provide wrapper functions that resonate well with the traditional function usage, then it becomes.
+To make it more user-friendly we could provide wrapper R functions that resonate well with the traditional function usage, then it becomes.
 ```R
 Multiply <- function(x, y) 
 {
@@ -260,6 +275,38 @@ Add <- function(x, y)
   .Call("Add", x, y)
 }
 ```
+
+### Version 3.0 and above: Using the C function in R 
+Edit the NAMESPACE file by adding useDynLib directives 
+```R
+useDynLib(RCExtension, .registration = TRUE, .fixes = "C_") 
+```
+
+By specifying these names in the useDynLib directive, the native symbols are resolved when the package is loaded and R variables identifying these symbols are added to the package's namespace with these names. These can be used in the .C, .Call, .Fortran and .External calls in place of the name of the routine and the PACKAGE argument. For instance, we can call the routines **Multiply**, **Add** etc from R with the code
+
+```R
+.C( C_Multiply, x, y, numeric(1) ) [[3]]
+```
+
+```R
+.Call( C_Add, x, y)
+```
+If we use it with with a R wrapper function then
+```R
+Multiply <- function(x, y) 
+{
+  .C( C_Multiply, x, y, numeric(1) ) [[3]]
+}
+```
+
+```R
+Add <- function(x, y) 
+{
+  .Call(C_Add, x, y)
+}
+```
+
+**FYI** : If a shared object/DLL is loaded more than once the most recent version is used. More generally, if the same symbol name appears in several shared objects, the most recently loaded occurrence is used.
 
 
 
