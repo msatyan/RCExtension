@@ -251,7 +251,7 @@ The .C() interface's automatic back and forth mapping between R vectors and thei
 Those C functions so far we have exposed to R can be called by using  its corresponding interface.
 
 ```diff
-- FYI: Such usage has broken with R version 3.0 and above
+- FYI: This type of usage has broken with R version 3.0 and above. Please see the next session where it describe V3 usage
 ```
 
 ```R
