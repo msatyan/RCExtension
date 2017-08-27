@@ -216,7 +216,8 @@ static const R_CMethodDef cMethods[] =
 };
 
 ```
-The R types and corresponding param type 
+The R types and corresponding param type   
+
 | **R type**   | **Param type** |**Raw C type**
 |:-------------|:---------------|:---------------
 | `numeric`    | REALSXP        | double *
