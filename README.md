@@ -33,7 +33,7 @@ library.dynam("RCExtension", package, lib.loc)
 ```
 
 A possible right location call this will be when a package is getting loaded. The **.onLoad()** lifecycle hook provided by R is getting called when a page get loaded. Then we may put the code in that routine.   
-See also :  .onAttach(),   .onUnload(),  .onDetach(),   .Last.lib()
+**See also** :  .onAttach(),   .onUnload(),  .onDetach(),   .Last.lib()
 
 ```R
 .onLoad <- function(lib, pkg) 
@@ -159,19 +159,21 @@ r.lib
 ### Exposing C functions to R
 By now you may have learned how to build a shared library from C source code. Then it is time to switch focus how to exposing C functions to R. In short it is by telling the **R interpreter** about the **C functions** that we have packed in the **extension shared library**. Eventually these functions will get exposed to R program.  
 
-We may call **R_registerRoutines()** function (a C API by R) to registering C functions that we plan to expose to R.This is typically done when the DLL is first loaded within the initialization routine R_init_**'dll name'** which is described in **dyn.load**.
+We may call **R_registerRoutines()** function (a C API by R) to registering C functions that we plan to expose to R. This is typically done when the DLL is first loaded within the initialization routine R_init_**'dll name'** which is described in **dyn.load**.
 
 ```C
-SEXP myCFunc1(SEXP a, SEXP b, SEXP c);
-SEXP myCFunc2(SEXP a, SEXP b);
-SEXP myCFunc3(SEXP a, SEXP b, SEXP c, SEXP d);
+SEXP Add(SEXP x, SEXP y);
+SEXP Subtract(SEXP x, SEXP y);
+SEXP Increment(SEXP x);
+SEXP MyPi();
 
-R_CallMethodDef callMethods[]  = 
+R_CallMethodDef callMethods[] = 
 {
-  {"myFunc1inR", (DL_FUNC) &myCFunc1, 3},
-  {"myFunc2inR", (DL_FUNC) &myCFunc2, 2},
-  {"myFunc3inR", (DL_FUNC) &myCFunc3, 4},
-  {NULL, NULL, 0}
+	{ "Add",        (DL_FUNC)&Add,       2 },
+	{ "Subtract",   (DL_FUNC)&Subtract,  2 },
+	{ "MyPi",       (DL_FUNC)&MyPi,      0 },
+	{ "Increment",  (DL_FUNC)&Increment, 1 },
+	{ NULL, NULL, 0 }
 };
 
 void R_init_RCExtension(DllInfo *dllInfo)
@@ -196,24 +198,33 @@ By default, R uses the operating system-specific dynamic loader to lookup the sy
 R allows mixing interface styles in the extensions, in the following example we have used both .C and .Call interfaces. Let us say, we are enhance the existing package by adding a couple of more C functions, this time by using .C interface then it may look like this.
 
 ```C
-void myCFunc5(double *x, int *n, char **names, int *status);
-void myCFunc6(double *x, int *n, char **names);
+// double *x, int *n, char **names, int *status
+// REALSXP,   INTSXP, STRSXP,       LGLSXP
 
-static R_NativePrimitiveArgType myCFunc5ArgType[] = {  REALSXP, INTSXP, STRSXP, LGLSXP };
-static R_NativePrimitiveArgType myCFunc6ArgType[] = {  REALSXP, INTSXP, STRSXP };
+// The C functions should return void if used with .C, 
+// to use function parameter to get return value. 
+void Multiply( double *x, double *y, double *result );
+void   Divide( double *x, double *y, double *result );
 
-static const R_CMethodDef cMethods[] = {
-   {"myFunc5inR", (DL_FUNC) &myCFunc5, 4, myCFunc5ArgType},
-   {"myFunc6inR", (DL_FUNC) &myCFunc6, 3, myCFunc6ArgType},
+static R_NativePrimitiveArgType argMultiply[] = {  REALSXP, REALSXP, REALSXP };
+static R_NativePrimitiveArgType argDivide[] = {  REALSXP, REALSXP, REALSXP };
+
+static const R_CMethodDef cMethods[] = 
+{ 
+   {"Multiply",   (DL_FUNC) &Multiply, 3, argMultiply},
+   {"Divide",     (DL_FUNC) &Divide,   3, argDivide},
    {NULL, NULL, 0, NULL}
 };
 
+```
+Then we modify the **R_registerRoutines()** function call to include **cMethods** structure also.
+```C
 void R_init_RCExtension(DllInfo *dllInfo)
 {
    R_registerRoutines( dllInfo, cMethods, callMethods, NULL, NULL);
 }
 ```
-The .C interface is very useful when we decided to expose existing C library function in R that knows nothing about R. Then while binding by using .C interface we are providing more details about the argument type of the native C functions. R uses this additional information during marshaling the value of the parameter while exchanging across language boundary. Where as in case of .Call interface the parameters are being accessed by reference then R assume each of the languages already know about the parameter type and its memory layout.
+The .C interface is useful when we decided to expose existing C library function in R that knows nothing about R. Then while binding by using .C interface we are providing more details about the argument type of the native C functions. R uses this additional information during marshaling the value of the parameter while exchanging across language boundary. Where as in case of .Call interface the parameters are being accessed by reference then R assume each of the languages already know about the parameter type and its memory layout.
 
 
 ##### See also:
