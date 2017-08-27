@@ -28,17 +28,16 @@ TODO:
 ### The extension module
 The core of the R extension by using C is a shared library (**.so** on Linux and **.DLL** on Windows). This shared library will be loaded on demand into R interpreter's process space by using **dyn.load** and unloaded by **dyn.unload**. 
 ```C
-// Example:
-library.dynam("RCExtension", package, lib.loc)
+library.dynam("RCExtension", package, lib)
 ```
 
 A possible right location call this will be when a package is getting loaded. The **.onLoad()** lifecycle hook provided by R is getting called when a page get loaded. Then we may put the code in that routine.   
 **See also** :  .onAttach(),   .onUnload(),  .onDetach(),   .Last.lib()
 
 ```R
-.onLoad <- function(lib, pkg) 
+.onLoad <- function(lib, package) 
 {
-   library.dynam("RCExtension", pkg, lib )
+   library.dynam("RCExtension", package, lib )
 }
 ```
 
@@ -252,7 +251,7 @@ The .C() interface's automatic back and forth mapping between R vectors and thei
 Those C functions so far we have exposed to R can be called by using  its corresponding interface.
 
 ```diff
-- FYI: This type of usage has broken with R version 3.0 and above. Please see the next session where it describe V3 usage
+- FYI: This type of usage has broken with R version 3.0 and above. Please see V3 usage
 ```
 
 ```R
@@ -278,12 +277,12 @@ Add <- function(x, y)
 ```
 
 ### Version 3.0 and above: Using the C function in R 
-Edit the NAMESPACE file by adding useDynLib directives 
+Edit the NAMESPACE file by adding **useDynLib** directives 
 ```R
 useDynLib(RCExtension, .registration = TRUE, .fixes = "C_") 
 ```
 
-By specifying these names in the useDynLib directive, the native symbols are resolved when the package is loaded and R variables identifying these symbols are added to the package's namespace with these names. These can be used in the .C, .Call, .Fortran and .External calls in place of the name of the routine and the PACKAGE argument. For instance, we can call the routines **Multiply**, **Add** etc from R with the code
+By specifying these names in the **useDynLib** directive, the native symbols are resolved when the package is loaded and R variables identifying these symbols are added to the package's namespace with these names. These can be used in the **.C**, **.Call**, **.Fortran** and **.External** calls in place of the name of the routine and the PACKAGE argument. For instance, we can call the routines **Multiply**, **Add** etc from R with the code
 
 ```R
 .C( C_Multiply, x, y, numeric(1) ) [[3]]

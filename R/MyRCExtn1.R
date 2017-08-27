@@ -15,9 +15,9 @@
 
 # library(RCExtension)
 #
-.onLoad <- function(lib, pkg) 
+.onLoad <- function(lib, package) 
 {
-   library.dynam("RCExtension", pkg, lib )
+   library.dynam("RCExtension", package, lib )
 }
 
 hello <- function() 
