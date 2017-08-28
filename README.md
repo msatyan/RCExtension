@@ -40,7 +40,7 @@ The core of the R extension by using C is a shared library (**.so** on Linux and
 library.dynam("RCExtension", package, lib)
 ```
 
-A possible right location call this will be when a package is getting loaded. The **.onLoad()** lifecycle hook provided by R is getting called when a page get loaded. Then we may put the code in that routine.   
+A possible right location to call **library.dynam()** will be when a package is getting loaded. The **.onLoad()** lifecycle hook provided by R is getting called when a page get loaded. Then we may put the code in that routine.   
 **See also** :  .onAttach(),   .onUnload(),  .onDetach(),   .Last.lib()
 
 ```R
@@ -97,7 +97,7 @@ total 21
 ```
 
 ### Visual Studio for builing the shared library
-We can use Visual Studio (here I am using VS 2017) to build the shared library. For this a bit of reverse engineering we have to do first. The R installation has put **R.DLL** but no **R.LIB**, then we have to create **R.LIB from R.DLL** before we can start use Visual Studio.  
+We can use Visual Studio (here I am using VS 2017) to build the shared library. For this a bit of reverse engineering we have to do first. The R installation has put **R.DLL** but no **R.LIB**, then we have to create **R.LIB from R.DLL** then we can start use Visual Studio.  
 
 I have installed 64 bit version of R at C:\Dev\R\R-3.4.1, then the R.DLL will be located at C:\Dev\R\R-3.4.1\bin\x64.
 
@@ -167,7 +167,7 @@ r.lib
 ### Exposing C functions to R
 By now you may have learned how to build a shared library from C source code. Then it is time to switch focus how to exposing C functions to R. In short it is by telling the **R interpreter** about the **C functions** that we have packed in the **extension shared library**. Eventually these functions will get exposed to R program.  
 
-We may call **R_registerRoutines()** function (a C API by R) to registering C functions that we plan to expose to R. This is typically done when the DLL is first loaded within the initialization routine R_init_**'dll name'** which is described in **dyn.load**.
+We may call **R_registerRoutines()** function (a C API by R) to registering C functions that we plan to expose to R. This is typically done when the DLL is first loaded within the initialization routine **R_init_'dll name'** (R_init_RCExtension) which is described in **dyn.load**.
 
 ```C
 SEXP Add(SEXP x, SEXP y);
@@ -190,7 +190,7 @@ void R_init_RCExtension(DllInfo *dllInfo)
 }
 ```
 
-R provides four interface for extending it {**.C, .Call, .Fortran, .External**}. In this example we are focusing more on **.Call** interface, it provides nice flexibility and efficiency by giving **reference access to memory structures** across language boundaries (R and C/C++) within the process. The **.C** interface is relatively simple but not that efficient though. Likely endup half the performance compared to **.Call** (if there is lot of data exchange with the function call) because it copies objects while exchanging language boundaries.  
+R provides four interface for extending it {**.C, .Call, .Fortran, .External**}. In this example we are focusing more on **.Call** interface, it provides nice flexibility and efficiency by giving **reference access to memory structures** across language boundaries (R and C/C++) within the process. The **.C** interface is relatively simple but not that efficient though. Likely endup half the performance compared to **.Call** (if there is a lot of data exchange with the function call) because it copies objects while exchanging language boundaries.  
 
 **FYI:** If you are planning to writer **C or C++** extension then you may also want to explore the **'Rcpp'** package. Though it is not an integral part of R, it may make the integration simpler without much performance impact. If the system need extremely high efficiency, scalability and fault tolerance then the **.Call** is likely be the choice.
 
