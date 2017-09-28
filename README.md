@@ -1,7 +1,7 @@
 ##### Copyright 2017 Sathyanesh Krishnan
 ##### Licensed under the Apache License, Version 2.0 
 
-## RCExtension
+## [RCExtension](https://msatyan.github.io/RCExtension/)
 Simple R Extensions with C language
 
 This is a sample R package to demonstrate how to extent R  functionality by using C language routines. The R supports writing extensions by using a verity of languages. Extension module by using C is very efficient and popular. The R provides flexibility and simplicity for statistical programing, at the same time it is inherently slow. The C language extensions can act as a turbocharger for R modules where it needs speed and efficiency.
