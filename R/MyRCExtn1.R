@@ -1,6 +1,6 @@
 # Hello, world!
 #
-# This is an example function named 'hello' 
+# This is an example function named 'hello'
 # which prints 'Hello, world!'.
 #
 # You can learn more about package authoring with RStudio at:
@@ -15,56 +15,24 @@
 
 # library(RCExtension)
 #
-.onLoad <- function(lib, package) 
+.onLoad <- function(lib, package)
 {
    library.dynam("RCExtension", package, lib )
 }
 
-hello <- function() 
-{
-  print("Hello, world!")
-}
-
-
-Increment <- function(x) 
-{
-  # .Call( "Increment" )
-  # .Call( getNativeSymbolInfo("Increment") )
-  .Call( C_Increment, x )
-}
-
-
-Multiply <- function(x, y) 
+####################################
+# Multiply in c
+####################################
+Multiply <- function(x, y)
 {
   # .C() automatically converts back and forth between R vectors and their C equivalents.
   # The output will be on the third parameter, extract that
-  .C( C_Multiply, x, y, numeric(1) ) [[3]]
+  .Call( C_MultiplyVector, as.numeric(x), as.numeric(y))
+
 }
 
-
-Divide <- function(x, y) 
+SchussWinkel <- function(v0,target_hit_error,angle_Schussebenen,Ziel_Schussebenen,m,k)
 {
-  # .C() automatically converts back and forth between R vectors and their C equivalents.
-  # The output will be on the third parameter, extract that
-  .C( C_Divide,  x, y, numeric(1) ) [[3]]
+  .Call( C_SchussWinkel, as.numeric(v0), as.numeric(target_hit_error), as.numeric(angle_Schussebenen),as.numeric(Ziel_Schussebenen), as.numeric(m),as.numeric(k))
 }
-
-
-MyPi <- function() 
-{
-  .Call(C_MyPi)
-}
-
-
-Add <- function(x, y) 
-{
-  .Call(C_Add, x, y)
-}
-
-
-Subtract <- function(x, y) 
-{
-  .Call(C_Subtract, x, y)
-}
-
 
