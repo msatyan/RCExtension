@@ -21,18 +21,10 @@
 }
 
 ####################################
-# Multiply in c
-####################################
-Multiply <- function(x, y)
-{
-  # .C() automatically converts back and forth between R vectors and their C equivalents.
-  # The output will be on the third parameter, extract that
-  .Call( C_MultiplyVector, as.numeric(x), as.numeric(y))
+# Flugbahn in c
 
-}
-
-SchussWinkel <- function(v0,target_hit_error,angle_Schussebenen,Ziel_Schussebenen,m,k)
+Flugbahn <- function(v0,target_hit_error,angle_Schussebenen,Ziel_Schussebenen,m,k)
 {
-  .Call( C_SchussWinkel, as.numeric(v0), as.numeric(target_hit_error), as.numeric(angle_Schussebenen),as.numeric(Ziel_Schussebenen), as.numeric(m),as.numeric(k))
+  .Call( C_Flugbahn, as.numeric(v0), as.numeric(target_hit_error), as.numeric(angle_Schussebenen),as.numeric(Ziel_Schussebenen), as.numeric(m),as.numeric(k))
 }
 
