@@ -4,19 +4,7 @@
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
 
-
-SEXP Add(SEXP x, SEXP y);
-SEXP Subtract(SEXP x, SEXP y);
-SEXP Increment(SEXP x);
-SEXP MyPi();
-SEXP MultiplyVector(SEXP x , SEXP y);
-SEXP SchussWinkel(SEXP v0, SEXP target_hit_error, SEXP angle_Schussebenen,SEXP Ziel_Schussebenen,SEXP m, SEXP k);
-
-
 /////////// .C interface style ////////////////
-// void MyFunc1(double *x, int *n, char **names, int *status);
-// static R_NativePrimitiveArgType argMyFunc1[] = {  REALSXP, INTSXP, STRSXP, LGLSXP };
-
 // The functions should return void in order to deal with .C,
 // so we have to use function parameter to return value to the caller.
 void Multiply( double *x, double *y, double *result );
@@ -33,15 +21,13 @@ static const R_CMethodDef cMethods[] =
    {NULL, NULL, 0, NULL}
 };
 
+////// .cal interface style ///////////////
+SEXP Flugbahn (SEXP v0, SEXP target_hit_error, SEXP angle_Schussebenen,SEXP Ziel_Schussebenen,SEXP m, SEXP k);
+
 R_CallMethodDef callMethods[] =
 {
 	// C functions extended by using .Call interface
-	{ "Add",        (DL_FUNC)&Add,       2 },
-	{ "Subtract",   (DL_FUNC)&Subtract,  2 },
-	{ "MyPi",       (DL_FUNC)&MyPi,      0 },
-	{ "Increment",  (DL_FUNC)&Increment, 1 },
-	{ "SchussWinkel",  (DL_FUNC)&SchussWinkel, 3 },
-	{ "MultiplyVector",  (DL_FUNC)&MultiplyVector, 2 },
+	{ "Flugbahn",   (DL_FUNC)&Flugbahn,  3 },
 	{ NULL, NULL, 0 }
 };
 
@@ -55,8 +41,7 @@ void R_unload_RCExtension(DllInfo *info)
 {
   // Release resources.
 }
-////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
+
 
 ////// Pure C functions to be used with .C interface /////
 // The functions should return void in order to deal with .C,
@@ -74,58 +59,7 @@ void Divide(double *x, double *y, double *result)
 		*result = *x / *y;
 }
 
-
-
-//////// Function to be used with .Call interface ////////////
-SEXP Add(SEXP x, SEXP y)
-{
-	SEXP result = PROTECT(allocVector(REALSXP, 1));
-	REAL(result)[0] = asReal(x) + asReal(y);
-	UNPROTECT(1);
-
-	return result;
-}
-
-SEXP Subtract(SEXP x, SEXP y)
-{
-	SEXP result = PROTECT(allocVector(REALSXP, 1));
-	REAL(result)[0] = asReal(x) - asReal(y);
-	UNPROTECT(1);
-
-	return result;
-}
-
-
-SEXP Increment(SEXP x)
-{
-	SEXP result = PROTECT(allocVector(REALSXP, 1));
-	REAL(result)[0] = asReal(x) + 1;
-	UNPROTECT(1);
-
-	return result;
-}
-
-SEXP MyPi()
-{
-	SEXP result = PROTECT(allocVector(REALSXP, 1));
-	REAL(result)[0] = 3.14159265359;
-	UNPROTECT(1);
-
-	return result;
-}
-
-SEXP MultiplyVector(SEXP x , SEXP y)
- {
-   int n = length(x);
-   SEXP out = PROTECT(allocVector(REALSXP, n));
-
-   for (int i = 0; i < n; i++) {
-     REAL(out)[i] =  REAL(x)[i]*asReal(y);
-   }
-   UNPROTECT(1);
-   return out;
- }
-
+///////// Functions in C to be used by C and only C
 double long betrag (double long x, double long y){
   return sqrt(pow(x,2)+pow(y,2));
 }
@@ -134,7 +68,8 @@ double long a_t (double long t,double long v0[], double m, double k){
   return (-1)*pow(betrag(v0[0],v0[1]),2)*k/m;
   }
 
-SEXP SchussWinkel(SEXP v0, SEXP target_hit_error ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,SEXP m, SEXP k)
+//////// Function to be used with .Call interface ////////////
+SEXP Flugbahn (SEXP v0, SEXP target_hit_error ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,SEXP m, SEXP k)
 {
   // Ziel
   double long angle  = asReal(angle_Schussebenen);
@@ -144,7 +79,7 @@ SEXP SchussWinkel(SEXP v0, SEXP target_hit_error ,SEXP angle_Schussebenen, SEXP 
   static double t      = 0.0001;
 
   //unsigned int long iter = floor(asReal(v0)/dist/asReal(target_hit_error)/t*0.1);
-  static unsigned int long iter = 100000;
+  const static unsigned int long iter = 100000;
   //Beschleunigung
   double long a = (-1)*(pow(asReal(v0),2)*asReal(k))/asReal(m);
 
@@ -152,7 +87,7 @@ SEXP SchussWinkel(SEXP v0, SEXP target_hit_error ,SEXP angle_Schussebenen, SEXP 
   double long dv_x =  a*cos(angle)*t;
   double long dv_y = (a*sin(angle)-9.81)*t; // -Erdbeschleunigung -9.81
 
-  static int column = 4;
+  const static int column = 5;
   //Datenspeicher
   double long m_data[iter+1][column];
 
@@ -165,10 +100,12 @@ SEXP SchussWinkel(SEXP v0, SEXP target_hit_error ,SEXP angle_Schussebenen, SEXP 
   m_data[0][3] = 0;              // init Position s_y
   m_data[1][2] = m_data[1][0]*t; // Position s_x
   m_data[1][3] = m_data[1][1]*t; // Position s_y
+  m_data[0][4] = 0; // t = 0
+  m_data[1][4] = t; // t = 0
 
-  long unsigned int cnt = 0;
+  unsigned int long cnt = 0;
   // Flugbahn
-  for(unsigned long int i = 2; i < iter; i++){
+  for(unsigned int long i = 2; i < iter; i++){
     // Flugwinkel
     double long angle = atan((m_data[i-2][3]-m_data[i-1][3])/(m_data[i-2][2]-m_data[i-1][2]));
     // letzte Distanz
@@ -187,16 +124,18 @@ SEXP SchussWinkel(SEXP v0, SEXP target_hit_error ,SEXP angle_Schussebenen, SEXP 
     // Neue Position
     m_data[i][2] = m_data[i-1][2] + m_data[i][0]*t; // alte position + v_x*t
     m_data[i][3] = m_data[i-1][3] + m_data[i][1]*t; // alte position + v_y*t
+    //Zeit
+    m_data[i][4] = i*t;
 
     //Abbruch: ist die alte Distanz kleiner als die neue
     if(dist_ < betrag(REAL(Ziel_Schussebenen)[0]-m_data[i][2],REAL(Ziel_Schussebenen)[1]-m_data[i][3])){
       break;
       }
-    cnt++;
+    cnt = cnt + 1;
   }
 
   //Datenspeicher von R lesbar
-  SEXP result = PROTECT(allocVector(REALSXP, 4*cnt));
+  SEXP result = PROTECT(allocVector(REALSXP, column*cnt));
   //apply data to vector
   for(unsigned long int i = 0; i < column; i++){
     for(unsigned long int j = 0; j < cnt; j++){
