@@ -83,7 +83,7 @@ SEXP Flugbahn (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,
   double long angle  = asReal(angle_Schussebenen);
   double long dist   = betrag(REAL(Ziel_Schussebenen)[0],REAL(Ziel_Schussebenen)[1]);
   //iterationen
-  const static unsigned int  iter = 100000;
+  const static unsigned int  iter = 10000;
   //Beschleunigung
   double long a = (-1)*(pow(asReal(v0),2)*asReal(k))/asReal(m);
 
@@ -167,7 +167,7 @@ SEXP FlugbahnV2 (SEXP v0, SEXP target_hit_error ,SEXP angle_Schussebenen, SEXP Z
   //static double t      = 0.0001;
 
   //unsigned int long iter = floor(asReal(v0)/dist/asReal(target_hit_error)/t*0.1);
-  const static unsigned int  iter = 100000;
+  const static unsigned int  iter = 10000;
   //Beschleunigung
   double long a = (-1)*(pow(asReal(v0),2)*asReal(k))/asReal(m);
 
