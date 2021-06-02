@@ -60,6 +60,11 @@ void Divide(double *x, double *y, double *result)
 }
 
 ///////// Functions in C to be used by C and only C
+
+//Konstanten
+const static double pi = 3.14159265359; //Kreiszahl
+const static double g = -9.81;        // [m / s ^ 2]
+
 double long betrag (double long x, double long y){
   return sqrt(pow(x,2)+pow(y,2));
 }
@@ -73,19 +78,19 @@ SEXP Flugbahn (SEXP v0, SEXP target_hit_error ,SEXP angle_Schussebenen, SEXP Zie
 {
   // Ziel
   double long angle  = asReal(angle_Schussebenen);
-  double  long dist   = betrag(REAL(Ziel_Schussebenen)[0],REAL(Ziel_Schussebenen)[1]);
+  double long dist   = betrag(REAL(Ziel_Schussebenen)[0],REAL(Ziel_Schussebenen)[1]);
   //iterationen
   //double  t      = 1/(asReal(v0)/asReal(target_hit_error));
   static double t      = 0.0001;
 
   //unsigned int long iter = floor(asReal(v0)/dist/asReal(target_hit_error)/t*0.1);
-  const static unsigned int long iter = 100000;
+  const static unsigned int  iter = 100000;
   //Beschleunigung
   double long a = (-1)*(pow(asReal(v0),2)*asReal(k))/asReal(m);
 
   //Geschwindigkeitsänderung
   double long dv_x =  a*cos(angle)*t;
-  double long dv_y = (a*sin(angle)-9.81)*t; // -Erdbeschleunigung -9.81
+  double long dv_y = (a*sin(angle)+g)*t; // -Erdbeschleunigung -9.81
 
   const static int column = 5;
   //Datenspeicher
@@ -116,7 +121,7 @@ SEXP Flugbahn (SEXP v0, SEXP target_hit_error ,SEXP angle_Schussebenen, SEXP Zie
     double long a    = -(1)*(pow(v0_,2)*asReal(k)) / asReal(m);
     //Geschwindigkeitsänderung
     double long dv_x =  a*cos(angle)       * t;
-    double long dv_y = (a*sin(angle)-9.81) * t;   // -Erdbeschleunigung -9.81
+    double long dv_y = (a*sin(angle)+g) * t;   // -Erdbeschleunigung -9.81
 
     // Neue Geschwindigkeit
     m_data[i][0] = m_data[i-1][0] + dv_x; // alte Geschwindigkeit x + delta v_x
@@ -127,7 +132,7 @@ SEXP Flugbahn (SEXP v0, SEXP target_hit_error ,SEXP angle_Schussebenen, SEXP Zie
     //Zeit
     m_data[i][4] = i*t;
 
-    //Abbruch: ist die alte Distanz kleiner als die neue
+    //Abbruch wenn die alte Distanz kleiner als die Neue
     if(dist_ < betrag(REAL(Ziel_Schussebenen)[0]-m_data[i][2],REAL(Ziel_Schussebenen)[1]-m_data[i][3])){
       break;
       }
