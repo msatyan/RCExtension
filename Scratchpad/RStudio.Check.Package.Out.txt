@@ -1,0 +1,82 @@
+==> Rcmd.exe build RCExtension
+
+* checking for file 'RCExtension/DESCRIPTION' ... OK
+* preparing 'RCExtension':
+* checking DESCRIPTION meta-information ... OK
+* cleaning src
+* checking for LF line-endings in source and make files
+* checking for empty or unneeded directories
+* building 'RCExtension_0.1.0.tar.gz'
+
+==> Rcmd.exe check RCExtension_0.1.0.tar.gz
+
+* using log directory 'C:/work/RCExtension.Rcheck'
+* using R version 3.4.1 (2017-06-30)
+* using platform: x86_64-w64-mingw32 (64-bit)
+* using session charset: ISO8859-1
+* checking for file 'RCExtension/DESCRIPTION' ... OK
+* checking extension type ... Package
+* this is package 'RCExtension' version '0.1.0'
+* package encoding: UTF-8
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... NOTE
+Found the following hidden files and directories:
+  .vs/RCExtension/v15/.suo
+  .vs
+These were most likely included in error. See section 'Package
+structure' in the 'Writing R Extensions' manual.
+* checking for portable file names ... OK
+* checking whether package 'RCExtension' can be installed ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... WARNING
+Non-standard license specification:
+  What license is it under?
+Standardizable: FALSE
+* checking top-level files ... NOTE
+File
+  LICENSE
+is not mentioned in the DESCRIPTION file.
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... NOTE
+File 'RCExtension/R/MyRCExtn1.R':
+  .onLoad has wrong argument list 'lib, package'
+
+Package startup functions should have two arguments with names starting
+  with 'lib' and 'pkg', respectively.
+See section 'Good practice' in '?.onAttach'.
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... WARNING
+Undocumented code objects:
+  'Add' 'C_Add' 'C_Divide' 'C_Increment' 'C_Multiply' 'C_MyPi'
+  'C_Subtract' 'Divide' 'Increment' 'Multiply' 'MyPi' 'Subtract'
+All user-level objects in a package should have documentation entries.
+See chapter 'Writing R documentation files' in the 'Writing R
+Extensions' manual.
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... OK
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking line endings in C/C++/Fortran sources/headers ... OK
+* checking compiled code ... OK
+* checking examples ... OK
+* checking PDF version of manual ...

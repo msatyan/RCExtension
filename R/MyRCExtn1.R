@@ -28,3 +28,7 @@ Flugbahn <- function(v0,target_hit_error,angle_Schussebenen,Ziel_Schussebenen,m,
   .Call( C_Flugbahn, as.numeric(v0), as.numeric(target_hit_error), as.numeric(angle_Schussebenen),as.numeric(Ziel_Schussebenen), as.numeric(m),as.numeric(k))
 }
 
+FlugbahnV2 <- function(v0,target_hit_error,angle_Schussebenen,Ziel_Schussebenen,m,k)
+{
+  .Call( C_FlugbahnV2, as.numeric(v0), as.numeric(target_hit_error), as.numeric(angle_Schussebenen),as.numeric(Ziel_Schussebenen), as.numeric(m),as.numeric(k))
+}
