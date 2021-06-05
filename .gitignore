@@ -1,6 +1,7 @@
 # Prerequisites
 *.d
 .Rhistory
+.RData
 
 # Object files
 *.o
@@ -55,7 +56,7 @@ dkms.conf
 
 #VS
 .vs
-x64 
+x64
 .vs/*
 x64/*
 
