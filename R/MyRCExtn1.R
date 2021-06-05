@@ -1,20 +1,5 @@
-# Hello, world!
-#
-# This is an example function named 'hello'
-# which prints 'Hello, world!'.
-#
-# You can learn more about package authoring with RStudio at:
-#
-#   http://r-pkgs.had.co.nz/
-#
-# Some useful keyboard shortcuts for package authoring:
-#
-#   Build and Reload Package:  'Ctrl + Shift + B'
-#   Check Package:             'Ctrl + Shift + E'
-#   Test Package:              'Ctrl + Shift + T'
-
 # library(RCExtension)
-#
+# R function wrapers to call C Functions
 .onLoad <- function(lib, package)
 {
    library.dynam("RCExtension", package, lib )
@@ -23,12 +8,17 @@
 ####################################
 # Flugbahn in c
 
-Flugbahn <- function(v0,target_hit_error,angle_Schussebenen,Ziel_Schussebenen,m,k)
+Flugbahn <- function(v0,t,angle_Schussebenen,Ziel_Schussebenen,m,k)
 {
-  .Call( C_Flugbahn, as.numeric(v0), as.numeric(target_hit_error), as.numeric(angle_Schussebenen),as.numeric(Ziel_Schussebenen), as.numeric(m),as.numeric(k))
+  .Call( C_Flugbahn, as.numeric(v0), as.numeric(t), as.numeric(angle_Schussebenen),as.numeric(Ziel_Schussebenen), as.numeric(m),as.numeric(k))
 }
 
-FlugbahnV2 <- function(v0,target_hit_error,angle_Schussebenen,Ziel_Schussebenen,m,k)
+FlugbahnV2 <- function(v0,t,angle_Schussebenen,Ziel_Schussebenen,m,k)
 {
-  .Call( C_FlugbahnV2, as.numeric(v0), as.numeric(target_hit_error), as.numeric(angle_Schussebenen),as.numeric(Ziel_Schussebenen), as.numeric(m),as.numeric(k))
+  .Call( C_FlugbahnV2, as.numeric(v0), as.numeric(t), as.numeric(angle_Schussebenen),as.numeric(Ziel_Schussebenen), as.numeric(m),as.numeric(k))
+}
+
+Multiply <- function(x,y)
+{
+  .C( C_Multiply, x, y, numeric(1) ) [[3]]
 }

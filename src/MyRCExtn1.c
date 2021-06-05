@@ -11,7 +11,7 @@
 /////////// .C interface style ////////////////
 // The functions should return void in order to deal with .C,
 // so we have to use function parameter to return value to the caller.
-void Multiply( double *x, double *y, double *result );
+void Multiply( double *x, double *y, double *result);
 void   Divide( double *x, double *y, double *result );
 
 static R_NativePrimitiveArgType argMultiply[] = {  REALSXP, REALSXP, REALSXP };
@@ -27,8 +27,8 @@ static const R_CMethodDef cMethods[] =
 
 ////// .cal interface style ///////////////
 //
-SEXP Flugbahn (SEXP v0, SEXP target_hit_error, SEXP angle_Schussebenen,SEXP Ziel_Schussebenen,SEXP m, SEXP k);
-SEXP FlugbahnV2 (SEXP v0, SEXP target_hit_error ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,SEXP m, SEXP k);
+SEXP Flugbahn (SEXP v0, SEXP t, SEXP angle_Schussebenen,SEXP Ziel_Schussebenen,SEXP m, SEXP k);
+SEXP FlugbahnV2 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,SEXP m, SEXP k);
 
 R_CallMethodDef callMethods[] =
 {
@@ -87,7 +87,7 @@ SEXP Flugbahn (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,
   double long angle  = asReal(angle_Schussebenen);
   double long dist   = betrag(REAL(Ziel_Schussebenen)[0],REAL(Ziel_Schussebenen)[1]);
   //iterationen
-  const static unsigned int  iter = 10000;
+  const static unsigned int  iter = 2000; // it is not possible to protect more memory than
   //Beschleunigung
   double long a = (-1)*(pow(asReal(v0),2)*asReal(k))/asReal(m);
 
@@ -161,169 +161,111 @@ SEXP Flugbahn (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,
   return result;
 }
 
-SEXP FlugbahnV2 (SEXP v0, SEXP target_hit_error ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,SEXP m, SEXP k)
+SEXP FlugbahnV2 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,SEXP m, SEXP k)
 {
-  // Ziel
-  double long angle  = asReal(angle_Schussebenen);
-  double long dist   = betrag(REAL(Ziel_Schussebenen)[0],REAL(Ziel_Schussebenen)[1]);
-  //iterationen
-  // Zeitabschnitt
-  const static double  t = 0.0000001;
-  //iterationen
-  const static unsigned int  iter = 300;
+  // Distance
+  double dist = betrag(REAL(Ziel_Schussebenen)[0], REAL(Ziel_Schussebenen)[1]);
+
+  // init memory to save the results according to distance in respect of time
+  unsigned long int iter = 2*floor(dist/(asReal(v0)*asReal(t)));
+  //Pointers to memory
+  double* p_vx = R_Calloc(iter,double);
+  double* p_vy = R_Calloc(iter,double);
+  double* p_sx = R_Calloc(iter,double);
+  double* p_sy = R_Calloc(iter,double);
+  double* p_t = R_Calloc(iter,double);
+
   //Beschleunigung
   double  a = (-1) * (pow(asReal(v0), 2) * asReal(k)) / asReal(m);
   //Geschwindigkeitsänderung
-  double  dv_x = a * cos(angle) * t;
-  double  dv_y = (a * sin(angle) + g) * t; // -Erdbeschleunigung -9.81
-  // Anzahl Spalten im Array
-  const static unsigned int column = 5;
-  //Datenspeicher für die sequentille Berechnung
-  double long m_data[iter][column];
+  double  dv_x = a * cos(asReal(angle_Schussebenen)) * asReal(t);
+  double  dv_y = (a * sin(asReal(angle_Schussebenen)) + g) * asReal(t); // -Erdbeschleunigung -9.81
 
   //Flugbahn inital
-  m_data[0][0] = asReal(v0) * cos(angle); // Anfangsgeschwindigkeit v_x
-  m_data[0][1] = asReal(v0) * sin(angle); // Anfangsgeschwindigkeit v_y
-  m_data[1][0] = m_data[0][0] + dv_x;   // Init Geschwindigkeit v_x + Geschwindigkeitsänderung
-  m_data[1][1] = m_data[0][1] + dv_y;   // Init Geschwindigkeit v_x + Geschwindigkeitsänderung
-  m_data[0][2] = 0;              // init Position s_x
-  m_data[0][3] = 0;              // init Position s_y
-  m_data[1][2] = m_data[1][0] * t; // Position s_x
-  m_data[1][3] = m_data[1][1] * t; // Position s_y
-  m_data[0][4] = 0; // t = 0
-  m_data[1][4] = t; // t = 0
+  p_vx[0] = asReal(v0)*cos(asReal(angle_Schussebenen)); // Anfangsgeschwindigkeit v_x
+  p_vy[0] = asReal(v0)*sin(asReal(angle_Schussebenen)); // Anfangsgeschwindigkeit v_y
+  p_vx[1] = p_vx[0] + dv_x;   // Init Geschwindigkeit v_x + Geschwindigkeitsänderung
+  p_vy[1] = p_vy[0] + dv_y;   // Init Geschwindigkeit v_x + Geschwindigkeitsänderung
+  p_sx[0] = 0;  // init Position s_x
+  p_sy[0] = 0;  // init Position s_y
+  p_sx[1] = p_vx[0] * asReal(t); // Position s_x
+  p_sy[1] = p_vy[0] * asReal(t); // Position s_y
+  p_t[0] = 0; // t = 0
+  p_t[1] = asReal(t); // t = 0
 
-
-/*//// Speichern der Werte in Vektoren (dynamische Länge)
-  // v_x
-  std::vector<double> v_x(1, m_data[0][0]);
-  v_x.push_back(m_data[1][0]);
-  // v_y
-  std::vector<double> v_y(1, m_data[0][1]);
-  v_y.push_back(m_data[1][1]);
-  // s_x
-  std::vector<double> s_x(1, m_data[0][2]);
-  s_x.push_back(m_data[1][2]);
-  // s_y
-  std::vector<double> s_y(1, m_data[0][3]);
-  s_y.push_back(m_data[1][3]);
-  // time
-  std::vector<double> vec_t(1, t);
-  vec_t.push_back(2*t);*/
-
-  // prints
-  /*
-  std::cout << "\nvector v_x: ";    print_vec(v_x);
-  std::cout << "vector v_y: ";      print_vec(v_y);
-  std::cout << "vector s_x: ";      print_vec(s_x);
-  std::cout << "vector s_y: ";      print_vec(s_y);
-  std::cout << "vector vec_t: ";    print_vec(vec_t);
-   */
-
+  // Zähler der Berechungsiterationen
   static unsigned int long cnt = 2;
-  static int notfinished = 0 ;
 
   // Flugbahn
   for (unsigned int long i = 2; i < iter; i++) {
     // Flugwinkel
-    double long angle = atan((m_data[i-1][3] - m_data[i][3]) / (m_data[i-1][2] - m_data[i][2]));
+    double long angle = atan((p_sy[i-1] - p_sy[i]) / (p_sx[i-1] - p_sx[i]));
     // letzte Distanz
-    double long dist_ = betrag(REAL(Ziel_Schussebenen)[0] - m_data[i - 1][2], REAL(Ziel_Schussebenen)[1] - m_data[i - 1][3]);
+    double long dist_ = betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i - 1], REAL(Ziel_Schussebenen)[1] - p_sy[i - 1]);
     // letzte Geschwindigkeit
-    double long v0_ = betrag(m_data[i - 1][0], m_data[i - 1][1]);
+    double long v0_ = betrag(p_vx[i - 1], p_vy[i - 1]);
     // Luftwiderstand (Beschleunigung entgegen der Flugrichtung)
     double long a = -(1) * (pow(v0_, 2) * asReal(k)) / asReal(m);
     //Geschwindigkeitsänderung
-    double long dv_x = a * cos(angle) * t;
-    double long dv_y = (a * sin(angle) - 9.81) * t;   // -Erdbeschleunigung -9.81
+    double long dv_x = a * cos(angle) * asReal(t);
+    double long dv_y = (a * sin(angle) - 9.81) * asReal(t);   // -Erdbeschleunigung -9.81
 
     // Neue Geschwindigkeit
-    m_data[i][0] = m_data[i-1][0] + dv_x; // alte Geschwindigkeit x + delta v_x
-    m_data[i][1] = m_data[i-1][1] + dv_y; // alte Geschwindigkeit y + delta v_y
+    p_vx[i] = p_vx[i-1] + dv_x; // alte Geschwindigkeit x + delta v_x
+    p_vy[i] = p_vy[i-1] + dv_y; // alte Geschwindigkeit y + delta v_y
     // Neue Position
-    m_data[i][2] = m_data[i-1][2] + m_data[i][0] * t; // alte position + v_x*t
-    m_data[i][3] = m_data[i-1][3] + m_data[i][1] * t; // alte position + v_y*t
+    p_sx[i] = p_sx[i-1] + p_vx[i] * asReal(t); // alte position + v_x*t
+    p_sy[i] = p_sy[i-1] + p_vy[i] * asReal(t); // alte position + v_y*t
     //Zeit
-    m_data[i][4] = i * t;
+    p_t[i] = i * asReal(t);
 
-    //Abbruch wenn die alte Distanz kleiner als die neue
-    if (dist_ < betrag(REAL(Ziel_Schussebenen)[0] - m_data[i][2], REAL(Ziel_Schussebenen)[1] - m_data[i][3])) {
-      notfinished = 1;
+    // Abbruch wenn der Flugwinkel fast -90 Grad wird alos das Geschoss nur noch fällt.
+    double long test = round(angle / pi * 180 * 1000) / 1000;
+    if (test < -89.99) {
       break;
     }
+    //Abbruch: ist die alte Distanz kleiner als die neue
+    if (dist_ < betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i], REAL(Ziel_Schussebenen)[1] - p_sy[i])) {
+
+      break;
+    }
+    // Zähler
     cnt = cnt + 1;
   }
-
-  int loop = 0;
-
-  while (notfinished == 1)
-  {
-
-    if (notfinished == 1) {
-      //Flugbahn inital
-      m_data[0][0] = m_data[iter-2][0]; // Anfangsgeschwindigkeit v_x
-      m_data[0][1] = m_data[iter-2][1]; // Anfangsgeschwindigkeit v_y
-      m_data[1][0] = m_data[iter-1][0]; // Init Geschwindigkeit v_x
-      m_data[1][1] = m_data[iter-1][1]; // Init Geschwindigkeit v_x
-      m_data[0][2] = m_data[iter-2][2]; // init Position s_x
-      m_data[0][3] = m_data[iter-2][3]; // init Position s_y
-      m_data[1][2] = m_data[iter-1][2]; // Position s_x
-      m_data[1][3] = m_data[iter-1][3]; // Position s_y
-      m_data[0][4] = m_data[iter-2][4]; // t = 0
-      m_data[1][4] = m_data[iter-1][4]; // t = 0
-
-      // Flugbahn
-      for (unsigned int long i = 2; i < iter; i++) {
-        // Flugwinkel
-        double long angle = atan((m_data[i-2][3] - m_data[i-1][3]) / (m_data[i-2][2] - m_data[i-1][2]));
-
-        // letzte Distanz
-        double dist_ = betrag(REAL(Ziel_Schussebenen)[0] - m_data[i - 1][2], REAL(Ziel_Schussebenen)[1] - m_data[i - 1][3]);
-        // letzte Geschwindigkeit
-        double long v0_ = betrag(m_data[i - 1][0], m_data[i - 1][1]);
-        // Luftwiderstand (Beschleunigung entgegen der Flugrichtung)
-        double long a = -(1) * (pow(v0_, 2) * asReal(k)) / asReal(m);
-        //Geschwindigkeitsänderung
-        double long dv_x = a * cos(angle) * t;
-        double long dv_y = (a * sin(angle) - 9.81) * t;   // -Erdbeschleunigung -9.81
-
-        // Neue Geschwindigkeit
-        m_data[i][0] = m_data[i - 1][0] + dv_x; // alte Geschwindigkeit x + delta v_x
-        m_data[i][1] = m_data[i - 1][1] + dv_y; // alte Geschwindigkeit y + delta v_y
-        // Neue Position
-        m_data[i][2] = m_data[i - 1][2] + m_data[i][0] * t; // alte position + v_x*t
-        m_data[i][3] = m_data[i - 1][3] + m_data[i][1] * t; // alte position + v_y*t
-        //Zeit
-        m_data[i][4] = i * t;
-
-        // Abbruch wenn der Flugwinkel fast -90 Grad wird. Objekt fällt nur noch
-        double long test = round(angle / pi * 180 * 1000) / 1000;
-        if (test < -89.99) {
-          notfinished = 0;
-          break;
-        }
-        //Abbruch: ist die alte Distanz kleiner als die neue
-        if (dist_ < betrag(REAL(Ziel_Schussebenen)[0] - m_data[i][2], REAL(Ziel_Schussebenen)[1] - m_data[i][3])) {
-          notfinished = 0;
-          break;
-        }
-        cnt = cnt + 1;
-      }
-    }
-    //v_x.push_back(iter - 1); v_y.push_back(iter - 1);
-    //s_x.push_back(iter - 1); s_y.push_back(iter - 1);
-    //vec_t.push_back(iter - 1);
-    loop = loop +1;
-  }
-
+  /*
   //Datenspeicher von R lesbar
-  SEXP result = PROTECT(allocVector(REALSXP, column*cnt));
+  SEXP result = PROTECT(allocVector(REALSXP, 5*cnt));
   //apply data to vector
   for(unsigned long int i = 0; i < column; i++){
     for(unsigned long int j = 0; j < cnt; j++){
       REAL(result)[j+(i*cnt)] = m_data[j][i];
     }
+  }*/
+
+  //Datenspeicher von R lesbar
+  SEXP result = PROTECT(allocVector(REALSXP, cnt*5));
+  //apply data to vector
+
+  for(unsigned long int i = 0; i < cnt; i++){
+    REAL(result)[i] = p_vx[i];
   }
+  for(unsigned long int i = 0; i < cnt; i++){
+    REAL(result)[i+iter] = p_vy[i];
+  }
+  for(unsigned long int i = 0; i < cnt; i++){
+    REAL(result)[i+iter*2] = p_vy[i];
+  }
+  for(unsigned long int i = 0; i < cnt; i++){
+    REAL(result)[i+iter*3] = p_vy[i];
+  }
+  for(unsigned long int i = 0; i < cnt; i++){
+    REAL(result)[i+iter*4] = p_t[i];
+  }
+
+  Free(p_vx);
+  Free(p_vy);
+  Free(p_sx);
+  Free(p_sy);
 
   UNPROTECT(1);
   return result;
