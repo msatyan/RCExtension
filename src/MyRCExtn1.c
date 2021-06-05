@@ -87,7 +87,7 @@ SEXP Flugbahn (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,
   double long angle  = asReal(angle_Schussebenen);
   double long dist   = betrag(REAL(Ziel_Schussebenen)[0],REAL(Ziel_Schussebenen)[1]);
   //iterationen
-  const static unsigned int  iter = 2000; // it is not possible to protect more memory than
+  const static unsigned int  iter = 2000; // it is not possible to protect more memory than for 10000 iterations
   //Beschleunigung
   double long a = (-1)*(pow(asReal(v0),2)*asReal(k))/asReal(m);
 
@@ -115,7 +115,7 @@ SEXP Flugbahn (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,
   // Flugbahn
   for(unsigned int long i = 2; i < iter; i++){
     // Flugwinkel
-    double long angle = atan((m_data[i-2][3]-m_data[i-1][3])/(m_data[i-2][2]-m_data[i-1][2]));
+    double long angle_ = atan((m_data[i-2][3]-m_data[i-1][3])/(m_data[i-2][2]-m_data[i-1][2]));
     // letzte Distanz
     double long dist_  = betrag(REAL(Ziel_Schussebenen)[0]-m_data[i-1][2],REAL(Ziel_Schussebenen)[1]-m_data[i-1][3]);
     // letzte Geschwindigkeit
@@ -123,8 +123,8 @@ SEXP Flugbahn (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,
     // Luftwiderstand (Beschleunigung entgegen der Flugrichtung)
     double long a    = -(1)*(pow(v0_,2)*asReal(k)) / asReal(m);
     //Geschwindigkeitsänderung
-    double long dv_x =  a*cos(angle)    * asReal(t);
-    double long dv_y = (a*sin(angle)+g) * asReal(t);   // -Erdbeschleunigung -9.81
+    double long dv_x =  a*cos(angle_)    * asReal(t);
+    double long dv_y = (a*sin(angle_)+g) * asReal(t);   // -Erdbeschleunigung -9.81
 
     // Neue Geschwindigkeit
     m_data[i][0] = m_data[i-1][0] + dv_x; // alte Geschwindigkeit x + delta v_x
@@ -136,7 +136,7 @@ SEXP Flugbahn (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,
     m_data[i][4] = i*asReal(t);
 
     // Abbruch wenn der Flugwinkel fast -90 Grad wird. Objekt fällt nur noch
-    double long test = round(angle / pi * 180 * 1000) / 1000;
+    double long test = round(angle_ / pi * 180 * 1000) / 1000;
     if (test < -89.99) {
       break;
     }
@@ -232,40 +232,23 @@ SEXP FlugbahnV2 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
     // Zähler
     cnt = cnt + 1;
   }
-  /*
-  //Datenspeicher von R lesbar
-  SEXP result = PROTECT(allocVector(REALSXP, 5*cnt));
-  //apply data to vector
-  for(unsigned long int i = 0; i < column; i++){
-    for(unsigned long int j = 0; j < cnt; j++){
-      REAL(result)[j+(i*cnt)] = m_data[j][i];
-    }
-  }*/
 
-  //Datenspeicher von R lesbar
-  SEXP result = PROTECT(allocVector(REALSXP, cnt*5));
-  //apply data to vector
+  SEXP result = PROTECT(allocVector(REALSXP, 4000));
 
-  for(unsigned long int i = 0; i < cnt; i++){
+  for(unsigned long int i = 0; i < 2001; i++){
     REAL(result)[i] = p_vx[i];
   }
-  for(unsigned long int i = 0; i < cnt; i++){
-    REAL(result)[i+iter] = p_vy[i];
-  }
-  for(unsigned long int i = 0; i < cnt; i++){
-    REAL(result)[i+iter*2] = p_vy[i];
-  }
-  for(unsigned long int i = 0; i < cnt; i++){
-    REAL(result)[i+iter*3] = p_vy[i];
-  }
-  for(unsigned long int i = 0; i < cnt; i++){
-    REAL(result)[i+iter*4] = p_t[i];
+  for(unsigned long int i = 2000; i < 4001; i++){
+    REAL(result)[i] = p_vy[i];
   }
 
-  Free(p_vx);
-  Free(p_vy);
-  Free(p_sx);
-  Free(p_sy);
+  R_Free(p_vx);
+  R_Free(p_vy);
+  R_Free(p_sx);
+  R_Free(p_sy);
+  R_Free(p_t);
+
+
 
   UNPROTECT(1);
   return result;
