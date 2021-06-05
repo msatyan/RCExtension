@@ -199,7 +199,7 @@ SEXP FlugbahnV2 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
   // Flugbahn
   for (unsigned int long i = 2; i < iter; i++) {
     // Flugwinkel
-    double long angle = atan((p_sy[i-1] - p_sy[i]) / (p_sx[i-1] - p_sx[i]));
+    double long angle = atan((p_sy[i-2] - p_sy[i-1]) / (p_sx[i-1] - p_sx[i-1]));
     // letzte Distanz
     double long dist_ = betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i - 1], REAL(Ziel_Schussebenen)[1] - p_sy[i - 1]);
     // letzte Geschwindigkeit
