@@ -85,3 +85,4 @@ df_plot%>%
   labs(title = "Flugbahn in C ",
        subtitle = paste("Aufloesung:",t, "s",
                         "\nTarget hit Error", target_hit_error))
+}
