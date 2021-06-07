@@ -162,7 +162,7 @@ SEXP FlugbahnV2 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
 {
   // Sequenz der Werte die abgespeichert werden müssen
   const unsigned int column = 5;
-  const unsigned int c_nb_values = 300;
+  const unsigned int c_nb_values = 10000;
 
   //Datenspeicher von R lesbar
   SEXP result = PROTECT(allocVector(REALSXP, c_nb_values*column));
@@ -226,7 +226,7 @@ SEXP FlugbahnV2 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
     double  test = round(angle_ / pi * 180 * 1000) / 1000;
 
     //Abbruch: ist die alte Distanz kleiner als die neue oder der Winkel fast -90Grad
-    if (dist_ < betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i], REAL(Ziel_Schussebenen)[1] - p_sy[i]) || test < -89.99) {
+    if (dist_ < betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i], REAL(Ziel_Schussebenen)[1] - p_sy[i]) ) {
 
       int ratio = round(i / c_nb_values);
       int c_seq[c_nb_values + 1];
