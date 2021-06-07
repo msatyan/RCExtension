@@ -49,7 +49,6 @@ void R_unload_RCExtension(DllInfo *info)
   // Release resources.
 }
 
-
 ////// Pure C functions to be used with .C interface /////
 // The functions should return void in order to deal with .C,
 // so we have to use function parameter to return value to the caller.
@@ -66,7 +65,6 @@ void Divide(double *x, double *y, double *result)
 }
 
 ///////// Functions in C to be used by C and only C
-
 //Konstanten
 const static double pi = 3.14159265359; //Kreiszahl
 const static double g = -9.81;        // [m / s ^ 2]
@@ -200,7 +198,6 @@ SEXP FlugbahnV2 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
   p_sy[1] = p_vy[0] * asReal(t); // Position s_y
   p_t[0] = 0.0; // t = 0
   p_t[1] = asReal(t);
-
 
   // Flugbahn
   for (unsigned int long i = 2; i < iter; i++) {
