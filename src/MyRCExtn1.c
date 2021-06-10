@@ -312,11 +312,11 @@ SEXP FlugbahnV3 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
   static unsigned int long cnt = 0;
   for (unsigned int long i = 2; i < iter; i++) {
     // Flugwinkel
-    double angle_ = atan((p_sy[i - 2] - p_sy[i - 1]) / (p_sx[i - 2] - p_sx[i - 1]));
+    double angle_ = atan((p_sy[i-2] - p_sy[i-1]) / (p_sx[i-2] - p_sx[i-1]));
     // letzte Distanz
-    double dist_ = betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i - 1], REAL(Ziel_Schussebenen)[1] - p_sy[i - 1]);
+    double dist_ = betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i-1], REAL(Ziel_Schussebenen)[1] - p_sy[i-1]);
     // letzte Geschwindigkeit
-    double v0_ = betrag(p_vx[i - 1], p_vy[i - 1]);
+    double v0_ = betrag(p_vx[i-1], p_vy[i-1]);
     // Luftwiderstand (Beschleunigung entgegen der Flugrichtung)
     double a = -(1) * (R_pow(v0_, 2) * asReal(k)) / asReal(m);
     //Geschwindigkeitsänderung
