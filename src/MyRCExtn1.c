@@ -1,8 +1,9 @@
 #include <R.h>
 #include <Rinternals.h>
 #include <Rmath.h>
-#include <stddef.h>
+//#include <stddef.h>
 #include <R_ext/Rdynload.h>
+#include <R_ext/Memory.h>
 
 /////////// .C interface style ////////////////
 // The functions should return void in order to deal with .C,
@@ -26,7 +27,7 @@ static const R_CMethodDef cMethods[] =
 SEXP Flugbahn (SEXP v0, SEXP t, SEXP angle_Schussebenen,SEXP Ziel_Schussebenen,SEXP m, SEXP k);
 SEXP FlugbahnV2 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,SEXP m, SEXP k);
 SEXP FlugbahnV3 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,SEXP m, SEXP k);
-SEXP foo(SEXP x, SEXP y);
+SEXP foo(SEXP x, SEXP c_lenght);
 
 R_CallMethodDef callMethods[] =
 {
@@ -222,11 +223,10 @@ SEXP FlugbahnV2 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
     //Zeit
     p_t[i] = i * asReal(t);
 
+    // Abbruch: ist die alte Distanz kleiner als die neue oder der Winkel fast -90Grad
     // Abbruch wenn der Flugwinkel fast -90 Grad wird als0 das Geschoss nur noch fällt.
-    double  test = round(angle_ / pi * 180 * 1000) / 1000;
-
-    //Abbruch: ist die alte Distanz kleiner als die neue oder der Winkel fast -90Grad
-    if (dist_ < betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i], REAL(Ziel_Schussebenen)[1] - p_sy[i]) || test < -89.99) {
+    // Abbruch wenn for loop fertig
+    if (dist_ < betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i], REAL(Ziel_Schussebenen)[1] - p_sy[i]) || round(angle_ / pi * 180 * 1000) / 1000 < -89.99 || i == iter-1) {
 
       int ratio = round(i / c_nb_values);
       int c_seq[c_nb_values + 1];
@@ -265,12 +265,11 @@ SEXP FlugbahnV2 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
   return result;
 }
 
-
 SEXP FlugbahnV3 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,SEXP m, SEXP k)
 {
   // Werte die abgespeichert werden und an R zurueckgegeben werden
   const unsigned int column = 5;
-  const unsigned int c_nb_values = 50;
+  const unsigned int c_nb_values = 200;
 
   //Datenspeicher von R lesbar
   SEXP result = PROTECT(allocVector(REALSXP, c_nb_values*column));
@@ -306,10 +305,11 @@ SEXP FlugbahnV3 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
   p_sy[0] = 0;  // init Position s_y
   p_sx[1] = p_vx[0] * asReal(t); // Position s_x
   p_sy[1] = p_vy[0] * asReal(t); // Position s_y
-  p_t[0] = 0; // t = 0
-  p_t[1] = asReal(t);
+  p_t[0]  = 0; // t = 0
+  p_t[1]  = asReal(t);
 
   // Flugbahn
+  static unsigned int long cnt = 0;
   for (unsigned int long i = 2; i < iter; i++) {
     // Flugwinkel
     double angle_ = atan((p_sy[i - 2] - p_sy[i - 1]) / (p_sx[i - 2] - p_sx[i - 1]));
@@ -332,11 +332,10 @@ SEXP FlugbahnV3 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
     //Zeit
     p_t[i] = i * asReal(t);
 
+    // Abbruch: ist die alte Distanz kleiner als die neue oder der Winkel fast -90Grad
     // Abbruch wenn der Flugwinkel fast -90 Grad wird als0 das Geschoss nur noch fällt.
-    double  test = round(angle_ / pi * 180 * 1000) / 1000;
-
-    //Abbruch: ist die alte Distanz kleiner als die neue oder der Winkel fast -90Grad
-    if (dist_ < betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i], REAL(Ziel_Schussebenen)[1] - p_sy[i]) || test < -89.99) {
+    // Abbruch wenn for loop fertig
+    if (dist_ < betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i], REAL(Ziel_Schussebenen)[1] - p_sy[i]) || round(angle_ / pi * 180 * 1000) / 1000 < -89.99 || i == iter-1) {
 
       int ratio = round(i / c_nb_values);
       int c_seq[c_nb_values + 1];
@@ -363,8 +362,8 @@ SEXP FlugbahnV3 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
       }
       break;
     }
+    cnt = cnt+1;
   }
-
   Free(p_vx);
   Free(p_vy);
   Free(p_sx);
@@ -375,26 +374,27 @@ SEXP FlugbahnV3 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
   return result;
 }
 
-SEXP foo(SEXP x, SEXP lenght)
+SEXP foo(SEXP x, SEXP c_lenght)
 {
   // User-controlled memory
   // https://colinfay.me/writing-r-extensions/the-r-api-entry-points-for-c-code.html
+  double* p_x = (double *)Calloc(asReal(c_lenght)+10, double);
 
-  // 6.1.1 Transient storage allocation
-  //x = (int *) R_alloc(10, sizeof(int));
+  //init
+  for(unsigned long int i = 0; i < asReal(c_lenght)+10; i++){
+    p_x[i] = 0.000001;
+  }
 
-  // 6.1.2 User-controlled memory
-  double* p_x = (double *)Calloc(asReal(lenght), double);
-
-  //
-  for(unsigned long int i = 0; i < asReal(lenght); i++){
-    p_x[i] = REAL(x)[i]*2.233333;
+  //assigne values
+  for(unsigned long int i = 0; i < asReal(c_lenght); i++){
+    *(p_x+i) = REAL(x)[i];
   }
 
   //Datenspeicher von R lesbar
-  SEXP result = PROTECT(allocVector(REALSXP,asReal(lenght)+10));
+  SEXP result = PROTECT(allocVector(REALSXP,asReal(c_lenght)+10));
+
   //apply data to vector
-  for(unsigned long int i = 0; i < asReal(lenght); i++){
+  for(unsigned long int i = 0; i < asReal(c_lenght)+10; i++){
     REAL(result)[i] = p_x[i];
   }
 

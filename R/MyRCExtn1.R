@@ -10,7 +10,7 @@
 
 Flugbahn <- function(v0,t,angle_Schussebenen,Ziel_Schussebenen,m,k)
 {
-  .Call( C_Flugbahn, as.numeric(v0), as.numeric(t), as.numeric(angle_Schussebenen),as.numeric(Ziel_Schussebenen), as.numeric(m),as.numeric(k))
+  .Call( C_FlugbahnV3, as.numeric(v0), as.numeric(t), as.numeric(angle_Schussebenen),as.numeric(Ziel_Schussebenen), as.numeric(m),as.numeric(k))
 }
 
 Multiply <- function(x,y)
@@ -20,5 +20,5 @@ Multiply <- function(x,y)
 
 foo <- function (x)
 {
-  .Call(C_foo, as.numeric(x), length(x))
+  .Call(C_foo, as.numeric(x), as.integer(length(x)))
 }
