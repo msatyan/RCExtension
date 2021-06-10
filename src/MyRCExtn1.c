@@ -309,7 +309,7 @@ SEXP FlugbahnV3 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
   p_t[1]  = asReal(t);
 
   // Flugbahn
-  static unsigned int long cnt = 0;
+  unsigned int long cnt = 0;
   for (unsigned int long i = 2; i < iter; i++) {
     // Flugwinkel
     double angle_ = atan((p_sy[i-2] - p_sy[i-1]) / (p_sx[i-2] - p_sx[i-1]));
@@ -337,12 +337,12 @@ SEXP FlugbahnV3 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
     // Abbruch wenn for loop fertig
     if (dist_ < betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i], REAL(Ziel_Schussebenen)[1] - p_sy[i]) || round(angle_ / pi * 180 * 1000) / 1000 < -89.99 || i == iter-1) {
 
-      int ratio = round(i / c_nb_values);
-      int c_seq[c_nb_values + 1];
+      int ratio = floor(i / c_nb_values-1);
+      int c_seq[c_nb_values];
       for (int i = 0; i < (c_nb_values) ; i++) {
         c_seq[i] = i * ratio;
       }
-      c_seq[c_nb_values] = i;
+      c_seq[c_nb_values-1] = i;
 
       //apply data to pointer
       for (unsigned int i = 0; i < c_nb_values; i++) {
