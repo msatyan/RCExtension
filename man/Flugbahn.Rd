@@ -53,8 +53,8 @@ k <- 0.5*cw*rho*A
 #####################################################################################
 m_flugbahn <- Flugbahn(v0,t,angle,Ziel_Schussebenen,m,k)
 
-m_flugbahn%>%
-  as_tibble()%>%
+m_flugbahn|>
+  as_tibble()|>
   ggplot(aes(s_x1,s_x2))+
   geom_line()+
   geom_point(data = tibble(x = Ziel_Schussebenen[1],y = Ziel_Schussebenen[2]),aes(x,y), color = "red")+
