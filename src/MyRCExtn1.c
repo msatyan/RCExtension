@@ -278,7 +278,7 @@ SEXP FlugbahnV3 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
   double dist = betrag(REAL(Ziel_Schussebenen)[0], REAL(Ziel_Schussebenen)[1]);
 
   // init memory to save the results according to distance in respect of time
-  unsigned long int  iter = 2 * round(dist / (asReal(v0) * asReal(t)));
+  unsigned long int  iter = 10 * round(dist / (asReal(v0) * asReal(t)));
 
   // Pointers to user controlled memory in R
   // https://colinfay.me/writing-r-extensions/the-r-api-entry-points-for-c-code.html
@@ -332,35 +332,68 @@ SEXP FlugbahnV3 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebene
     //Zeit
     p_t[i] = i * asReal(t);
 
-    // Abbruch: ist die alte Distanz kleiner als die neue oder der Winkel fast -90Grad
-    // Abbruch wenn der Flugwinkel fast -90 Grad wird als0 das Geschoss nur noch fällt.
-    // Abbruch wenn for loop fertig
-    if (dist_ < betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i], REAL(Ziel_Schussebenen)[1] - p_sy[i]) || round(angle_ / pi * 180 * 1000) / 1000 < -89.99 || i == iter-1) {
+    // Solange das Geschoss aufsteigt darf nicht abgebrochen werden
+    if (!(p_vy[i] >= 0)) {
+      // Abbruch: ist die alte Distanz kleiner als die neue oder der Winkel fast -90Grad
+      // Abbruch wenn der Flugwinkel fast -90 Grad wird als0 das Geschoss nur noch fällt.
+      // Abbruch wenn for loop fertig
+      if (dist_ < betrag(REAL(Ziel_Schussebenen)[0] - p_sx[i], REAL(Ziel_Schussebenen)[1] - p_sy[i]) || round(angle_ / pi * 180 * 1000) / 1000 < -89.99 || i == iter-1) {
 
-      int ratio = floor(i / c_nb_values-1);
-      int c_seq[c_nb_values];
-      for (int i = 0; i < (c_nb_values) ; i++) {
-        c_seq[i] = i * ratio;
-      }
-      c_seq[c_nb_values-1] = i;
+        int ratio = floor(i / c_nb_values-1);
+        int c_seq[c_nb_values];
+        for (int i = 0; i < (c_nb_values) ; i++) {
+          c_seq[i] = i * ratio;
+        }
+        c_seq[c_nb_values-1] = i;
 
-      //apply data to pointer
-      for (unsigned int i = 0; i < c_nb_values; i++) {
-        REAL(result)[i + (0 * c_nb_values)] = p_vx[c_seq[i]];
+        //apply data to pointer
+        for (unsigned int i = 0; i < c_nb_values; i++) {
+          REAL(result)[i + (0 * c_nb_values)] = p_vx[c_seq[i]];
+        }
+        for (unsigned int i = 0; i < c_nb_values; i++) {
+          REAL(result)[i + (1 * c_nb_values)] = p_vy[c_seq[i]];
+        }
+        for (unsigned int i = 0; i < c_nb_values; i++) {
+          REAL(result)[i + (2 * c_nb_values)] = p_sx[c_seq[i]];
+        }
+        for (unsigned int i = 0; i < c_nb_values; i++) {
+          REAL(result)[i + (3 * c_nb_values)] = p_sy[c_seq[i]];
+        }
+        for (unsigned int i = 0; i < c_nb_values; i++) {
+          REAL(result)[i + (4 * c_nb_values)] = p_t[c_seq[i]];
+        }
+        break;
       }
-      for (unsigned int i = 0; i < c_nb_values; i++) {
-        REAL(result)[i + (1 * c_nb_values)] = p_vy[c_seq[i]];
+
+    }else {
+      // Abbruch wenn am Ziel vorbei
+      if (p_sx[i] > REAL(Ziel_Schussebenen)[0]) {
+
+        int ratio = floor(i / c_nb_values-1);
+        int c_seq[c_nb_values];
+        for (int i = 0; i < (c_nb_values) ; i++) {
+          c_seq[i] = i * ratio;
+        }
+        c_seq[c_nb_values-1] = i;
+
+        //apply data to pointer
+        for (unsigned int i = 0; i < c_nb_values; i++) {
+          REAL(result)[i + (0 * c_nb_values)] = p_vx[c_seq[i]];
+        }
+        for (unsigned int i = 0; i < c_nb_values; i++) {
+          REAL(result)[i + (1 * c_nb_values)] = p_vy[c_seq[i]];
+        }
+        for (unsigned int i = 0; i < c_nb_values; i++) {
+          REAL(result)[i + (2 * c_nb_values)] = p_sx[c_seq[i]];
+        }
+        for (unsigned int i = 0; i < c_nb_values; i++) {
+          REAL(result)[i + (3 * c_nb_values)] = p_sy[c_seq[i]];
+        }
+        for (unsigned int i = 0; i < c_nb_values; i++) {
+          REAL(result)[i + (4 * c_nb_values)] = p_t[c_seq[i]];
+        }
+        break;
       }
-      for (unsigned int i = 0; i < c_nb_values; i++) {
-        REAL(result)[i + (2 * c_nb_values)] = p_sx[c_seq[i]];
-      }
-      for (unsigned int i = 0; i < c_nb_values; i++) {
-        REAL(result)[i + (3 * c_nb_values)] = p_sy[c_seq[i]];
-      }
-      for (unsigned int i = 0; i < c_nb_values; i++) {
-        REAL(result)[i + (4 * c_nb_values)] = p_t[c_seq[i]];
-      }
-      break;
     }
     cnt = cnt+1;
   }
