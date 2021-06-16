@@ -37,9 +37,11 @@ foo <- function (x)
 }
 ####################################
 # Pendelbewegung in C
-penulum_get_theta <- function ( t,  L,  delta_t,  THETA_0,  THETA_DOT_0,  mu)
+penulum_get_theta <- function ( t,  L,  delta_t,  THETA_0,  THETA_DOT_0,  mu, type = "theta")
 {
-  m_result <-.Call(C_penulum_get_theta, as.numeric(t), as.numeric(L), as.numeric(delta_t), as.numeric(THETA_0), as.numeric(THETA_DOT_0),  as.numeric(mu))|>
+  m_result <-.Call(C_penulum_get_theta, as.numeric(t), as.numeric(L), as.numeric(delta_t),
+                   as.numeric(THETA_0), as.numeric(THETA_DOT_0),  as.numeric(mu),
+                   as.character(type))|>
     matrix(ncol = 3)
   colnames(m_result) <- c("t","theta","theta_dot")
   return(m_result)

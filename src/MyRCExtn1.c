@@ -25,14 +25,14 @@ static const R_CMethodDef cMethods[] =
 //
 SEXP Flugbahn (SEXP v0, SEXP t, SEXP angle_Schussebenen,SEXP Ziel_Schussebenen,SEXP m, SEXP k);
 SEXP foo(SEXP x, SEXP c_lenght);
-SEXP penulum_get_theta(SEXP t, SEXP L, SEXP delta_t, SEXP THETA_0, SEXP THETA_DOT_0, SEXP mu);
+SEXP penulum_get_theta(SEXP t, SEXP L, SEXP delta_t, SEXP THETA_0, SEXP THETA_DOT_0, SEXP mu, SEXP return_type);
 
 R_CallMethodDef callMethods[] =
 {
 	// C functions extended by using .Call interface
 	{ "Flugbahn",   (DL_FUNC)&Flugbahn,  6 },
 	{ "foo",   (DL_FUNC)&foo,  2 },
-	{ "penulum_get_theta", (DL_FUNC)&penulum_get_theta,  6 },
+	{ "penulum_get_theta", (DL_FUNC)&penulum_get_theta,  7 },
 	{ NULL, NULL, 0 }
 };
 
@@ -256,17 +256,17 @@ SEXP foo(SEXP x, SEXP c_lenght)
 }
 
 
-SEXP penulum_get_theta(SEXP t, SEXP L, SEXP delta_t, SEXP THETA_0, SEXP THETA_DOT_0, SEXP mu)
+SEXP penulum_get_theta(SEXP t, SEXP L, SEXP delta_t, SEXP THETA_0, SEXP THETA_DOT_0, SEXP mu, SEXP return_type)
 {
   // Werte die abgespeichert werden und an R zurueckgegeben werden
   const unsigned int column = 3;        // colums of matrix
-  const unsigned int c_nb_values = 300; // rows of matrix
+  const unsigned int c_nb_values = 1000; // rows of matrix
 
   //Datenspeicher von R lesbar
   SEXP result = PROTECT(allocVector(REALSXP, c_nb_values*column));
 
   // Anzahl zu berechneder Werte
-  unsigned int long nb_values = ceil(asReal(t) / asReal(delta_t));
+  unsigned int long nb_values = ceil(asReal(t) / asReal(delta_t))+1;
 
   // Pointers to user controlled memory in R
   // https://colinfay.me/writing-r-extensions/the-r-api-entry-points-for-c-code.html
@@ -288,7 +288,7 @@ SEXP penulum_get_theta(SEXP t, SEXP L, SEXP delta_t, SEXP THETA_0, SEXP THETA_DO
     p_theta_dot[i] = theta_dot;
   }
   // Nur die die vorgegebenen Anzahl Werte zurückgeben
-  int ratio = floor(nb_values / c_nb_values)-1;
+  int ratio = floor(nb_values / c_nb_values)+1;
   int c_seq[c_nb_values];
   for (int i = 0; i < (c_nb_values); i++) {
     c_seq[i] = i * ratio;
