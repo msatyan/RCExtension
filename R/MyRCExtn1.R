@@ -6,8 +6,7 @@
 }
 
 ####################################
-# Flugbahn in c
-
+# Flugbahn eines Geschosses in C
 Flugbahn <- function(v0,t=1e-5,angle,Ziel_Schussebenen,m,k)
 {
   if(Ziel_Schussebenen[1]<0){
@@ -35,4 +34,13 @@ Multiply <- function(x,y)
 foo <- function (x)
 {
   .Call(C_foo, as.numeric(x), as.integer(length(x)))
+}
+####################################
+# Pendelbewegung in C
+penulum_get_theta <- function ( t,  L,  delta_t,  THETA_0,  THETA_DOT_0,  mu)
+{
+  m_result <-.Call(C_penulum_get_theta, as.numeric(t), as.numeric(L), as.numeric(delta_t), as.numeric(THETA_0), as.numeric(THETA_DOT_0),  as.numeric(mu))|>
+    matrix(ncol = 3)
+  colnames(m_result) <- c("t","theta","theta_dot")
+  return(m_result)
 }

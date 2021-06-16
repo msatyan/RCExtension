@@ -1,7 +1,6 @@
 #include <R.h>
 #include <Rinternals.h>
 #include <Rmath.h>
-//#include <stddef.h>
 #include <R_ext/Rdynload.h>
 #include <R_ext/Memory.h>
 
@@ -25,15 +24,15 @@ static const R_CMethodDef cMethods[] =
 ////// .cal interface style ///////////////
 //
 SEXP Flugbahn (SEXP v0, SEXP t, SEXP angle_Schussebenen,SEXP Ziel_Schussebenen,SEXP m, SEXP k);
-SEXP FlugbahnV2 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,SEXP m, SEXP k);
-SEXP FlugbahnV3 (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,SEXP m, SEXP k);
 SEXP foo(SEXP x, SEXP c_lenght);
+SEXP penulum_get_theta(SEXP t, SEXP L, SEXP delta_t, SEXP THETA_0, SEXP THETA_DOT_0, SEXP mu);
 
 R_CallMethodDef callMethods[] =
 {
 	// C functions extended by using .Call interface
 	{ "Flugbahn",   (DL_FUNC)&Flugbahn,  6 },
 	{ "foo",   (DL_FUNC)&foo,  2 },
+	{ "penulum_get_theta", (DL_FUNC)&penulum_get_theta,  6 },
 	{ NULL, NULL, 0 }
 };
 
@@ -76,13 +75,20 @@ double long a_t (double long t,double long v0[], double m, double k){
   return (-1)*R_pow(betrag(v0[0],v0[1]),2)*k/m;
   }
 
+/// Definition of ODE for Penulum calculation
+double get_theta_double_dot(double theta, double theta_dot, double L, double mu)
+  {
+    return -mu*theta_dot - (g/L)*sin(theta);
+  }
+
+
 //////// Function to be used with .Call interface ////////////
 
 SEXP Flugbahn (SEXP v0, SEXP t ,SEXP angle_Schussebenen, SEXP Ziel_Schussebenen,SEXP m, SEXP k)
 {
   // Werte die abgespeichert werden und an R zurueckgegeben werden
-  const unsigned int column = 5;
-  const unsigned int c_nb_values = 200;
+  const unsigned int column = 5;        // colums of matrix
+  const unsigned int c_nb_values = 200; // rows of matrix
 
   //Datenspeicher von R lesbar
   SEXP result = PROTECT(allocVector(REALSXP, c_nb_values*column));
@@ -249,8 +255,60 @@ SEXP foo(SEXP x, SEXP c_lenght)
   return result;
 }
 
+
 SEXP penulum_get_theta(SEXP t, SEXP L, SEXP delta_t, SEXP THETA_0, SEXP THETA_DOT_0, SEXP mu)
 {
-    for(unsigned long int i = 0; i < )
+  // Werte die abgespeichert werden und an R zurueckgegeben werden
+  const unsigned int column = 3;        // colums of matrix
+  const unsigned int c_nb_values = 300; // rows of matrix
+
+  //Datenspeicher von R lesbar
+  SEXP result = PROTECT(allocVector(REALSXP, c_nb_values*column));
+
+  // Anzahl zu berechneder Werte
+  unsigned int long nb_values = ceil(asReal(t) / asReal(delta_t));
+
+  // Pointers to user controlled memory in R
+  // https://colinfay.me/writing-r-extensions/the-r-api-entry-points-for-c-code.html
+  // 6.1.2 User-controlled memory
+  double* p_theta = (double *)Calloc(nb_values, double);
+  double* p_theta_dot = (double *)Calloc(nb_values, double);
+
+  double theta = asReal(THETA_0);
+  double theta_dot = asReal(THETA_DOT_0);
+
+  //
+  double theta_double_dot;
+  unsigned int i;
+  for (i = 0; i < nb_values; i++) {
+    theta_double_dot = get_theta_double_dot(theta, theta_dot, asReal(L), asReal(mu));
+    theta = theta + (theta_dot * asReal(delta_t));
+    theta_dot = theta_dot + (theta_double_dot * asReal(delta_t));
+    p_theta[i] = theta;
+    p_theta_dot[i] = theta_dot;
+  }
+  // Nur die die vorgegebenen Anzahl Werte zurückgeben
+  int ratio = floor(nb_values / c_nb_values)-1;
+  int c_seq[c_nb_values];
+  for (int i = 0; i < (c_nb_values); i++) {
+    c_seq[i] = i * ratio;
+  }
+  c_seq[c_nb_values - 1] = nb_values-1;
+
+  //apply data to pointer
+  for (int i = 0; i < c_nb_values; i++) {
+    REAL(result)[i + (0 * c_nb_values)] = c_seq[i]*asReal(delta_t);
+  }
+  for (int i = 0; i < c_nb_values; i++) {
+    REAL(result)[i + (1 * c_nb_values)] = p_theta[c_seq[i]];
+  }
+  for (int i = 0; i < c_nb_values; i++) {
+    REAL(result)[i + (2 * c_nb_values)] = p_theta_dot[c_seq[i]];
+  }
+
+  Free(p_theta);
+  Free(p_theta_dot);
+  UNPROTECT(1);
+  return result;
 }
 
