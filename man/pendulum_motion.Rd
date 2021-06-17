@@ -1,14 +1,11 @@
-\name{penulum_get_theta}
-\alias{penulum_get_theta}
+\name{pendulum_motion}
+\alias{pendulum_motion}
 \title{Pedelbewegung theta(t)}
 \usage{
-penulum_get_theta( t,  L,  delta_t,  THETA_0,  THETA_DOT_0,  mu)
+pendulum_motion( t,  L,  delta_t,  THETA_0,  THETA_DOT_0,  mu)
 }
 \description{
-Caluclating pendulum motion including  friction
-}
-\details{
-
+Caluclating pendulum motion including  friction in repect to time
 }
 
 \arguments{
@@ -20,12 +17,14 @@ Caluclating pendulum motion including  friction
 
 \item{THETA_0}{start angel [rad]}
 
-\item{THETA_DOT_0}{start velocitiy [m/s]}
+\item{THETA_DOT_0}{start angular velocity [m/s]}
 
 \item{mu}{friction}
 }
 
-\return {matrix}
+\value{
+Returns matrix with theta and the angular acceleration \code{x}
+}
 
 \examples{
 delta_t <- 1e-6

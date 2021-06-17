@@ -25,14 +25,14 @@ static const R_CMethodDef cMethods[] =
 //
 SEXP Flugbahn (SEXP v0, SEXP t, SEXP angle_Schussebenen,SEXP Ziel_Schussebenen,SEXP m, SEXP k);
 SEXP foo(SEXP x, SEXP c_lenght);
-SEXP penulum_get_theta(SEXP t, SEXP L, SEXP delta_t, SEXP THETA_0, SEXP THETA_DOT_0, SEXP mu, SEXP return_type);
+SEXP pendulum_motion(SEXP t, SEXP L, SEXP delta_t, SEXP THETA_0, SEXP THETA_DOT_0, SEXP mu, SEXP return_type);
 
 R_CallMethodDef callMethods[] =
 {
 	// C functions extended by using .Call interface
 	{ "Flugbahn",   (DL_FUNC)&Flugbahn,  6 },
 	{ "foo",   (DL_FUNC)&foo,  2 },
-	{ "penulum_get_theta", (DL_FUNC)&penulum_get_theta,  7 },
+	{ "pendulum_motion", (DL_FUNC)&pendulum_motion,  7 },
 	{ NULL, NULL, 0 }
 };
 
@@ -256,7 +256,7 @@ SEXP foo(SEXP x, SEXP c_lenght)
 }
 
 
-SEXP penulum_get_theta(SEXP t, SEXP L, SEXP delta_t, SEXP THETA_0, SEXP THETA_DOT_0, SEXP mu, SEXP return_type)
+SEXP pendulum_motion(SEXP t, SEXP L, SEXP delta_t, SEXP THETA_0, SEXP THETA_DOT_0, SEXP mu, SEXP return_type)
 {
   // Werte die abgespeichert werden und an R zurueckgegeben werden
   const unsigned int column = 3;        // colums of matrix
@@ -274,8 +274,8 @@ SEXP penulum_get_theta(SEXP t, SEXP L, SEXP delta_t, SEXP THETA_0, SEXP THETA_DO
   double* p_theta = (double *)Calloc(nb_values, double);
   double* p_theta_dot = (double *)Calloc(nb_values, double);
 
-  double theta = asReal(THETA_0);
-  double theta_dot = asReal(THETA_DOT_0);
+  double theta = asReal(THETA_0); // angel
+  double theta_dot = asReal(THETA_DOT_0); // angular velocity
 
   //
   double theta_double_dot;
