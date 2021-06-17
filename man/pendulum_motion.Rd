@@ -9,25 +9,25 @@ Caluclating pendulum motion including  friction in repect to time
 }
 
 \arguments{
-\item{t}{end time of calculation [s]}
+\item{t}{time range , calculation from 0 to t }
 
-\item{L}{Pendelum lenght [m]}
+\item{L}{Pendelum lenght}
 
-\item{delta_t}{calculation time inerval [s]}
+\item{delta_t}{calculation time inerval}
 
 \item{THETA_0}{start angel [rad]}
 
-\item{THETA_DOT_0}{start angular velocity [m/s]}
+\item{THETA_DOT_0}{start angular velocity [rad/delta_t]}
 
 \item{mu}{friction}
 }
 
 \value{
-Returns matrix with theta and the angular acceleration \code{x}
+Returns matrix with theta and the angular velocity \code{x}
 }
 
 \examples{
 delta_t <- 1e-6
-system.time(penulum_get_theta(50, 2,  delta_t,   pi/3,   0,  0.1)|>
-              plot(type = "l",main = paste("calculation time intervall [s]",delta_t)))
+system.time(pendulum_motion(50, 2,  delta_t,   pi/3,   0,  0.1)|>
+              plot(type = "l",main = paste("time interval [s]",delta_t)))
 }

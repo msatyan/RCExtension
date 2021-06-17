@@ -43,6 +43,6 @@ pendulum_motion <- function ( t,  L,  delta_t,  THETA_0,  THETA_DOT_0,  mu, type
                    as.numeric(THETA_0), as.numeric(THETA_DOT_0),  as.numeric(mu),
                    as.character(type))|>
     matrix(ncol = 3)
-  colnames(m_result) <- c("t","angle","acceleration")
+  colnames(m_result) <- c("t","angle","angular_v")
   return(m_result)
 }
